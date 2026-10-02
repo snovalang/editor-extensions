@@ -119,7 +119,7 @@ export function activate(context: ExtensionContext) {
       const filePath = editor.document.fileName;
       const term = getTerminal();
       term.show();
-      term.sendText(`sncli run "${filePath}"`);
+      term.sendText(`snl run "${filePath}"`);
     })
   );
 
@@ -127,7 +127,7 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand("snova.checkProject", () => {
       const term = getTerminal();
       term.show();
-      term.sendText("sncli check --project .");
+      term.sendText("snl check --project .");
     })
   );
 }
