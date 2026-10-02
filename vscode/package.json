@@ -60,13 +60,13 @@
             },
             {
                 "command": "snova.runFile",
-                "title": "Run Current File (sncli run)",
+                "title": "Run Current File (snl run)",
                 "category": "Snovalang",
                 "icon": "$(play)"
             },
             {
                 "command": "snova.checkProject",
-                "title": "Check Project (sncli check)",
+                "title": "Check Project (snl check)",
                 "category": "Snovalang"
             }
         ],
