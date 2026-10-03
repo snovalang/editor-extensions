@@ -1,13 +1,7 @@
-# rust-toolchain.toml
-# Força o toolchain GNU no Windows para evitar erro de compilação:
-#   LINK fatal error LNK1104 — msvcrt.lib not found
-#
-# O Zed compila a extensão internamente via `cargo build`. Com o toolchain
-# MSVC padrão, build scripts falham por falta do Windows SDK (msvcrt.lib).
-# O toolchain GNU não precisa do Windows SDK e funciona sem instalação adicional.
+# Zed compiles this extension for wasm32-wasip2 (zed_extension_api 0.7).
+# A host-specific toolchain pin breaks Linux and macOS release builds.
 
 [toolchain]
-channel = "stable-x86_64-pc-windows-gnu"
-targets = ["wasm32-wasip1"]
-components = ["rustfmt", "clippy"]
+channel = "stable"
+targets = ["wasm32-wasip2"]
 profile = "minimal"

@@ -1,22 +1,32 @@
-# Snovalang — Zed Editor Extension
+# Snovalang — Zed extension
 
-Extensão oficial da linguagem Snovalang para o editor **Zed**.
+Syntax highlighting and `snova-lsp` integration for Zed.
 
-## Funcionalidades
-- Destaque sintático completo (`highlights.scm`)
-- Suporte a emparelhamento de chaves, colchetes e parênteses (`brackets.scm`)
-- Document outline e navegação de símbolos (`outline.scm`)
-- Integração nativa com `snova-lsp` para diagnósticos, hover, definition e completion.
+## Install
 
-## Instalação no Zed
-1. Compile o servidor com `make` no repositório `snova-lsp`; no Windows o
-   executável será criado em `tools/bin/snova-lsp.exe`.
-2. Execute o instalador da extensão. O servidor será copiado para
-   `%LOCALAPPDATA%\Zed\tools\bin` no Windows e `~/.config/zed/tools/bin` no
-   macOS/Linux, e esse diretório será adicionado ao PATH persistente.
-3. Instale/recarregue a extensão no Zed.
+Linux and macOS:
 
-Os grammars são carregados dos diretórios `tree-sitter-snovalang` e
-`tree-sitter-snovalang-manifest` neste repositório, usando a revisão fixada em
-`extension.toml`. Para atualizar uma revisão publicada, altere os SHAs no
-manifesto após gerar e validar os parsers.
+```sh
+curl -fsSL https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-zed.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-zed.ps1 | iex
+```
+
+The script downloads [`snovalang-zed.tar.gz`](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) from the latest GitHub release and installs the prebuilt extension (`extension.wasm`, grammar WebAssembly, and language queries). Restart Zed, or run **zed: reload extensions**.
+
+`snova-lsp` must be on `PATH` for diagnostics, hover, and completion.
+
+## Features
+
+- Highlights, brackets, indents, and outline queries
+- Language server command for `snova-lsp` (`--stdio`)
+
+## Developing
+
+Run **zed: install dev extension** and select this directory. Zed compiles the extension. Grammar sources are loaded from the `repository`, `path`, and `rev` entries in `extension.toml`.
+
+`../scripts/package-zed.sh` builds the release archive. On Windows, `build.ps1` is the local packaging helper when the MSVC linker cannot find `msvcrt.lib`.

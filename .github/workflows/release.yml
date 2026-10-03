@@ -1,0 +1,56 @@
+name: Release extensions
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+      - name: Package VS Code extension
+        run: ./scripts/package-vscode.sh
+      - name: Package Zed extension
+        run: ./scripts/package-zed.sh
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          tag="${GITHUB_REF_NAME}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" dist/snovalang.vsix dist/snovalang-zed.tar.gz \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$tag" dist/snovalang.vsix dist/snovalang-zed.tar.gz \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$tag" \
+              --notes "Snovalang editor extensions ${tag}. Install instructions are in the repository README."
+          fi
+      - name: Publish to extension registries when credentials exist
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          set -eu
+          if [ -n "${VSCE_PAT}" ]; then
+            npx --yes @vscode/vsce publish --packagePath dist/snovalang.vsix -p "$VSCE_PAT"
+          else
+            echo "VSCE_PAT is not set. Skipping the Visual Studio Marketplace."
+          fi
+          if [ -n "${OVSX_PAT}" ]; then
+            npx --yes ovsx publish dist/snovalang.vsix -p "$OVSX_PAT"
+          else
+            echo "OVSX_PAT is not set. Skipping Open VSX."
+          fi

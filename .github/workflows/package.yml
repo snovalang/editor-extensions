@@ -1,0 +1,29 @@
+name: Package extensions
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+      - name: Package VS Code extension
+        run: ./scripts/package-vscode.sh
+      - name: Package Zed extension
+        run: ./scripts/package-zed.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: editor-extensions
+          path: |
+            dist/snovalang.vsix
+            dist/snovalang-zed.tar.gz
