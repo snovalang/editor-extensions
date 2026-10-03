@@ -8,8 +8,8 @@
     {
       "scope": "source.snovalang",
       "file-types": [
-        "snova",
-        "sno"
+        "snl",
+        "sns"
       ]
     }
   ],

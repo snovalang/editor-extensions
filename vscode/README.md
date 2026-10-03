@@ -23,6 +23,6 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 ## Use
 
 - Put `snova-lsp` on `PATH`, or set `snova.lsp.serverPath`.
-- Open a `.snova` or `.sno` file.
+- Open a `.snl` source or a `.sns` script.
 - **Snovalang: Run Current File** runs `snl run`.
 - **Snovalang: Check Project** runs `snl check --project .`.

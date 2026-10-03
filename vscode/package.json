@@ -32,7 +32,7 @@
             {
                 "id": "snova",
                 "aliases": ["Snovalang", "snova"],
-                "extensions": [".snova", ".sno"],
+                "extensions": [".snl", ".sns"],
                 "configuration": "./language-configuration.json"
             },
             {
@@ -80,7 +80,7 @@
         "menus": {
             "editor/title": [
                 {
-                    "when": "resourceExtname == .snova",
+                    "when": "resourceExtname == .snl || resourceExtname == .sns",
                     "command": "snova.runFile",
                     "group": "navigation"
                 }

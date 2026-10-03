@@ -76,7 +76,7 @@ export function activate(context: ExtensionContext) {
     ],
     synchronize: {
       fileEvents: workspace.createFileSystemWatcher(
-        "**/{*.snova,*.sno,mod.sno,snova.mod,snova.sno,snova.toml}"
+        "**/{*.snl,*.sns,mod.sno,snova.mod,snova.sno,snova.toml}"
       ),
     },
   };

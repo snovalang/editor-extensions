@@ -50,7 +50,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 
 ### VS Code ([`vscode/`](vscode/))
 
-- TextMate highlighting for `.snova` and `.sno`
+- TextMate highlighting for `.snl` sources and `.sns` scripts
 - Snippets (`func`, `method`, `class`, `struct`, `enum`, `match`, `for`, `pulsar`)
 - Language configuration (brackets and auto-closing pairs)
 - Language client for `snova-lsp` over stdio

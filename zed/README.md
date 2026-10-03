@@ -18,7 +18,7 @@ irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install
 
 The script downloads [`snovalang-zed.tar.gz`](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) from the latest GitHub release and installs the prebuilt extension (`extension.wasm`, grammar WebAssembly, and language queries). Restart Zed, or run **zed: reload extensions**.
 
-`snova-lsp` must be on `PATH` for diagnostics, hover, and completion.
+`snova-lsp` must be on `PATH` for diagnostics, hover, and completion. The extension treats `.snl` as Snovalang source and `.sns` as a Snovalang script.
 
 ## Features
 
