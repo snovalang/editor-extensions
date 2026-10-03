@@ -13,7 +13,7 @@ import {
 let client: LanguageClient;
 let snovaTerminal: Terminal | undefined;
 
-function resolveServerBinary(configuredPath: string): string {
+function resolveServerBinary(extensionPath: string, configuredPath: string): string {
   if (configuredPath && configuredPath !== "snova-lsp") {
     return configuredPath;
   }
@@ -21,17 +21,20 @@ function resolveServerBinary(configuredPath: string): string {
   const binaryName = process.platform === "win32" ? "snova-lsp.exe" : "snova-lsp";
   const home = os.homedir();
   const localAppData = process.env.LOCALAPPDATA || "";
+  const bundled = path.join(extensionPath, "server", binaryName);
 
   const candidates = [
-    // 1. System/User .snova directory
+    // 1. Binary shipped inside this VSIX (includes the Windows tmpfile fix)
+    bundled,
+    // 2. System/User .snova directory
     path.join(home, ".snova", "bin", binaryName),
-    // 2. Standalone snova-lsp install directory
+    // 3. Standalone snova-lsp install directory
     path.join(localAppData, "snova-lsp", "bin", binaryName),
-    // 3. Zed tools/bin directory if installed
+    // 4. Zed tools/bin directory if installed
     path.join(localAppData, "Zed", "tools", "bin", binaryName),
-    // 4. Local workspace tools/bin
+    // 5. Local workspace tools/bin
     path.join(workspace.workspaceFolders?.[0]?.uri.fsPath || "", "tools", "bin", binaryName),
-    // 5. Bare name to resolve via PATH
+    // 6. Bare name to resolve via PATH
     binaryName,
   ];
 
@@ -54,7 +57,7 @@ function getTerminal(): Terminal {
 export function activate(context: ExtensionContext) {
   const config = workspace.getConfiguration("snova");
   const configuredServerPath = config.get<string>("lsp.serverPath", "snova-lsp");
-  const serverPath = resolveServerBinary(configuredServerPath);
+  const serverPath = resolveServerBinary(context.extensionPath, configuredServerPath);
   const traceServer = config.get<string>("trace.server", "off");
 
   const logArgs: string[] = [];
@@ -76,7 +79,7 @@ export function activate(context: ExtensionContext) {
     ],
     synchronize: {
       fileEvents: workspace.createFileSystemWatcher(
-        "**/{*.snl,*.sns,mod.sno,snova.mod,snova.sno,snova.toml}"
+        "**/{*.snl,*.sns,mod.sns,snova.mod,snova.sns,snova.toml}"
       ),
     },
   };

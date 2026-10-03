@@ -2,7 +2,7 @@
     "name": "snovalang",
     "displayName": "Snovalang",
     "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "publisher": "aggitech",
     "repository": {
         "type": "git",
@@ -23,8 +23,8 @@
     "activationEvents": [
         "onLanguage:snova",
         "onLanguage:snova-manifest",
-        "workspaceContains:**/mod.sno",
-        "workspaceContains:**/snova.sno",
+        "workspaceContains:**/mod.sns",
+        "workspaceContains:**/snova.sns",
         "workspaceContains:**/snova.toml"
     ],
     "contributes": {
@@ -37,8 +37,8 @@
             },
             {
                 "id": "snova-manifest",
-                "aliases": ["Snovalang Manifest", "mod.sno"],
-                "filenames": ["mod.sno", "snova.mod", "snova.sno", "snova.toml", "Snovalang.toml"]
+                "aliases": ["Snovalang Manifest", "mod.sns"],
+                "filenames": ["mod.sns", "snova.mod", "snova.sns", "snova.toml", "Snovalang.toml"]
             }
         ],
         "grammars": [
