@@ -86,60 +86,14 @@ if [[ $SELECTION == *"default"* ]]; then
     echo "Run: source $shell_rc  (or open a new terminal)"
   fi
 fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $SELECTION == *"vscode"* ]]; then
   echo "Installing Snovalang extension for VS Code..."
-  # TODO: code --install-extension snovalang.snovalang
+  "$SCRIPT_DIR/install-vscode.sh"
 fi
 if [[ $SELECTION == *"zed"* ]]; then
   echo "Installing Snovalang extension for Zed..."
-
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  ZED_EXT_SRC="$SCRIPT_DIR/zed"
-
-  # Determine Zed extensions directory based on OS
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    ZED_DIR="$HOME/.config/zed"
-  elif [[ -n "${LOCALAPPDATA:-}" ]]; then
-    ZED_DIR="${LOCALAPPDATA}/Zed"
-  else
-    ZED_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
-  fi
-  ZED_EXT_DIR="$ZED_DIR/extensions/installed/snovalang"
-  ZED_BIN_DIR="$ZED_DIR/tools/bin"
-
-  if [ ! -d "$ZED_EXT_SRC" ]; then
-    echo "ERROR: Zed extension source not found at: $ZED_EXT_SRC"
-    exit 1
-  fi
-
-  # Remove previous installation if exists
-  if [ -d "$ZED_EXT_DIR" ]; then
-    rm -rf "$ZED_EXT_DIR"
-    echo "Removed previous Zed extension installation."
-  fi
-
-  # Copy extension files to Zed extensions directory
-  mkdir -p "$(dirname "$ZED_EXT_DIR")"
-  rm -rf "$ZED_EXT_DIR"
-  cp -r "$ZED_EXT_SRC" "$ZED_EXT_DIR"
-  mkdir -p "$ZED_BIN_DIR"
-  LSP_SOURCE="$SCRIPT_DIR/../snova-lsp/tools/bin/snova-lsp"
-  [ -f "$LSP_SOURCE" ] || LSP_SOURCE="$SCRIPT_DIR/../snova-lsp/build/snova-lsp"
-  if [ -f "$LSP_SOURCE" ]; then
-    rm -f "$ZED_BIN_DIR/snova-lsp"
-    cp "$LSP_SOURCE" "$ZED_BIN_DIR/snova-lsp"
-    chmod +x "$ZED_BIN_DIR/snova-lsp"
-    shell_rc="${HOME}/.profile"
-    [ -f "${HOME}/.zshrc" ] && shell_rc="${HOME}/.zshrc"
-    if ! grep -Fq "$ZED_BIN_DIR" "$shell_rc" 2>/dev/null; then
-      printf '\nexport PATH="$PATH:%s"\n' "$ZED_BIN_DIR" >> "$shell_rc"
-    fi
-  else
-    echo "WARNING: snova-lsp was not found; build snova-lsp first."
-  fi
-  echo "Snovalang Zed extension installed to: $ZED_EXT_DIR"
-  echo ""
-  echo "IMPORTANT: Restart Zed and run 'zed: reload extensions' (Cmd/Ctrl+Shift+P) to activate."
+  "$SCRIPT_DIR/install-zed.sh"
 fi
 
 exit 0

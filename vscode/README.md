@@ -1,12 +1,28 @@
 # Snovalang — VS Code Extension
 
-Extensão oficial do Snovalang para Visual Studio Code com integração completa com `snova-lsp`.
+Syntax highlighting, snippets, and a language client for Snovalang.
 
-## Funcionalidades
-- **Syntax Highlighting**: Gramática TextMate completa com suporte a keywords, tipos, interpolação de strings `${...}`, números e decoradores.
-- **Language Server Protocol (LSP)**: Autocomplete inteligente, diagnósticos de compilação em tempo real (`publishDiagnostics`), hover, go to definition e document symbols.
-- **Snippets**: Atalhos de código para `func`, `method`, `class`, `struct`, `enum`, `match`, `for` e `pulsar`.
+## Install
 
-## Instalação e Uso
-1. Certifique-se de que o executável `snova-lsp` está presente no seu `PATH` (ou configure em `snova.lsp.serverPath`).
-2. Abra qualquer arquivo `.snova` ou `.sno` no VS Code.
+Linux and macOS:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-vscode.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-vscode.ps1 | iex
+```
+
+The script downloads the latest [`snovalang.vsix`](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) and runs `code --install-extension snovalang.vsix`.
+
+From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
+
+## Use
+
+- Put `snova-lsp` on `PATH`, or set `snova.lsp.serverPath`.
+- Open a `.snova` or `.sno` file.
+- **Snovalang: Run Current File** runs `snl run`.
+- **Snovalang: Check Project** runs `snl check --project .`.

@@ -1,9 +1,3 @@
-# .cargo/config.toml — Configuração de build para a extensão Zed (Snovalang)
-#
-# Extensões Zed devem ser compiladas para wasm32-wasip1.
-# No Windows com MSVC, o linker falha por ausência do Windows SDK (msvcrt.lib).
-# Solução: usa o toolchain GNU para compilar os build scripts (host), pois
-# o WASM em si não depende do linker nativo.
-
+# Zed extensions using zed_extension_api 0.7 compile to a WASI preview2 component.
 [build]
-target = "wasm32-wasip1"
+target = "wasm32-wasip2"
