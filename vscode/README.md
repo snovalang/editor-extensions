@@ -22,7 +22,7 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 
 ## Use
 
-- Put `snova-lsp` on `PATH`, or set `snova.lsp.serverPath`.
+- The extension starts the `snova-lsp` binary shipped in `server/`. Set `snova.lsp.serverPath` to use a different binary.
 - Open a `.snl` source or a `.sns` script.
 - **Snovalang: Run Current File** runs `snl run`.
 - **Snovalang: Check Project** runs `snl check --project .`.
