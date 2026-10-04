@@ -2,7 +2,7 @@
 
 Syntax highlighting, snippets, and language-server support for Snovalang in VS Code and Zed.
 
-Run and check actions call the installed compiler command, `snl`. Diagnostics, hover, and completion use the `snova-lsp` binary bundled in the VS Code extension. A `snova-lsp` on `PATH` is the fallback.
+Run and check actions call the installed compiler command, `snl`. Diagnostics, hover, and completion use the language server bundled in the VS Code extension. On macOS that binary is the universal Mach-O `server/snova-lsp-darwin` (Apple Silicon and Intel). The extension does not launch the Linux ELF `snova-lsp` or the Windows `snova-lsp.exe` on macOS. A `snova-lsp` whose executable header matches the host is the fallback.
 
 ## VS Code
 
@@ -52,7 +52,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 
 - TextMate highlighting for `.snl` sources and `.sns` scripts
 - Manifest highlighting for `mod.sns` and `snova.sns`
-- Bundled `snova-lsp` (the server that discards diagnostics without `tmpfile()`)
+- Bundled language server: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`
 - Snippets (`func`, `method`, `class`, `struct`, `enum`, `match`, `for`, `pulsar`)
 - Language configuration (brackets and auto-closing pairs)
 - Language client for `snova-lsp` over stdio

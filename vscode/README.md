@@ -22,7 +22,7 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 
 ## Use
 
-- The extension starts the `snova-lsp` binary shipped in `server/`. Set `snova.lsp.serverPath` to use a different binary.
+- On macOS the extension starts the universal Mach-O `server/snova-lsp-darwin` and does not launch the Linux ELF or the Windows executable. Linux starts `server/snova-lsp`. Windows starts `server/snova-lsp.exe`. Set `snova.lsp.serverPath` to use a different binary.
 - Open a `.snl` source or a `.sns` script.
 - **Snovalang: Run Current File** runs `snl run`.
 - **Snovalang: Check Project** runs `snl check --project .`.

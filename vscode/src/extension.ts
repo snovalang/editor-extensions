@@ -3,6 +3,13 @@ import * as os from "os";
 import * as fs from "fs";
 import { workspace, window, commands, ExtensionContext, Terminal } from "vscode";
 import {
+  bundledServerFileName,
+  chooseServerBinary,
+  serverHost,
+  type ServerCandidate,
+  type ServerHost,
+} from "./serverBinary";
+import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
@@ -10,41 +17,49 @@ import {
   Trace,
 } from "vscode-languageclient/node";
 
-let client: LanguageClient;
+let client: LanguageClient | undefined;
 let snovaTerminal: Terminal | undefined;
 
-function resolveServerBinary(extensionPath: string, configuredPath: string): string {
+function readHeader(filePath: string): Buffer | null {
+  let fd: number | null = null;
+  try {
+    fd = fs.openSync(filePath, "r");
+    const header = Buffer.alloc(4);
+    const read = fs.readSync(fd, header, 0, 4, 0);
+    return read === 4 ? header : null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== null) fs.closeSync(fd);
+  }
+}
+
+function candidatePaths(extensionPath: string, host: ServerHost): string[] {
+  const installedName = host === "win32" ? "snova-lsp.exe" : "snova-lsp";
+  const home = os.homedir();
+  const localAppData = process.env.LOCALAPPDATA || "";
+  const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || "";
+  return [
+    path.join(extensionPath, "server", bundledServerFileName(host)),
+    path.join(home, ".snova", "bin", installedName),
+    path.join(localAppData, "snova-lsp", "bin", installedName),
+    path.join(localAppData, "Zed", "tools", "bin", installedName),
+    path.join(workspaceRoot, "tools", "bin", installedName),
+    installedName,
+  ];
+}
+
+function resolveServerBinary(extensionPath: string, configuredPath: string): string | null {
   if (configuredPath && configuredPath !== "snova-lsp") {
     return configuredPath;
   }
 
-  const binaryName = process.platform === "win32" ? "snova-lsp.exe" : "snova-lsp";
-  const home = os.homedir();
-  const localAppData = process.env.LOCALAPPDATA || "";
-  const bundled = path.join(extensionPath, "server", binaryName);
-
-  const candidates = [
-    // 1. Binary shipped inside this VSIX (includes the Windows tmpfile fix)
-    bundled,
-    // 2. System/User .snova directory
-    path.join(home, ".snova", "bin", binaryName),
-    // 3. Standalone snova-lsp install directory
-    path.join(localAppData, "snova-lsp", "bin", binaryName),
-    // 4. Zed tools/bin directory if installed
-    path.join(localAppData, "Zed", "tools", "bin", binaryName),
-    // 5. Local workspace tools/bin
-    path.join(workspace.workspaceFolders?.[0]?.uri.fsPath || "", "tools", "bin", binaryName),
-    // 6. Bare name to resolve via PATH
-    binaryName,
-  ];
-
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return binaryName;
+  const host = serverHost(process.platform);
+  const candidates: ServerCandidate[] = candidatePaths(extensionPath, host).map((filePath) => ({
+    path: filePath,
+    header: readHeader(filePath),
+  }));
+  return chooseServerBinary(host, candidates);
 }
 
 function getTerminal(): Terminal {
@@ -58,6 +73,12 @@ export function activate(context: ExtensionContext) {
   const config = workspace.getConfiguration("snova");
   const configuredServerPath = config.get<string>("lsp.serverPath", "snova-lsp");
   const serverPath = resolveServerBinary(context.extensionPath, configuredServerPath);
+  if (!serverPath) {
+    window.showErrorMessage(
+      "Snovalang could not find a language server for this operating system. On macOS the extension starts server/snova-lsp-darwin and does not launch the Linux or Windows binary.",
+    );
+    return;
+  }
   const traceServer = config.get<string>("trace.server", "off");
 
   const logArgs: string[] = [];

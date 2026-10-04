@@ -2,7 +2,7 @@
     "name": "snovalang",
     "displayName": "Snovalang",
     "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "publisher": "aggitech",
     "repository": {
         "type": "git",
@@ -93,7 +93,7 @@
                 "snova.lsp.serverPath": {
                     "type": "string",
                     "default": "snova-lsp",
-                    "description": "Path to snova-lsp binary executable"
+                    "description": "Path to the snova-lsp executable. On macOS the default starts the bundled universal Mach-O server/snova-lsp-darwin."
                 },
                 "snova.trace.server": {
                     "type": "string",
