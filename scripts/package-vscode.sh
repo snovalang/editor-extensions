@@ -20,14 +20,44 @@ if [ -n "${SNOVA_LSP_WIN_BIN:-}" ] && [ -f "$SNOVA_LSP_WIN_BIN" ]; then
 elif [ -f "$ROOT/../snova-lsp/tools/bin/snova-lsp.exe" ]; then
   cp "$ROOT/../snova-lsp/tools/bin/snova-lsp.exe" "$ROOT/vscode/server/snova-lsp.exe"
 fi
-
-if [ ! -f "$ROOT/vscode/server/snova-lsp" ] && [ ! -f "$ROOT/vscode/server/snova-lsp.exe" ]; then
-  echo "snovalang.vsix needs vscode/server/snova-lsp or snova-lsp.exe" >&2
-  exit 1
+if [ -n "${SNOVA_LSP_DARWIN_BIN:-}" ] && [ -f "$SNOVA_LSP_DARWIN_BIN" ]; then
+  cp "$SNOVA_LSP_DARWIN_BIN" "$ROOT/vscode/server/snova-lsp-darwin"
+  chmod 755 "$ROOT/vscode/server/snova-lsp-darwin"
 fi
+
+for required in snova-lsp snova-lsp.exe snova-lsp-darwin; do
+  if [ ! -f "$ROOT/vscode/server/$required" ]; then
+    echo "snovalang.vsix needs vscode/server/$required" >&2
+    exit 1
+  fi
+done
+
+darwin_kind=$(file "$ROOT/vscode/server/snova-lsp-darwin")
+printf '%s\n' "$darwin_kind" | grep -q "Mach-O universal" || {
+  echo "snova-lsp-darwin is not a Mach-O universal binary: $darwin_kind" >&2
+  exit 1
+}
+printf '%s\n' "$darwin_kind" | grep -q "x86_64" || {
+  echo "snova-lsp-darwin is missing an Intel slice: $darwin_kind" >&2
+  exit 1
+}
+printf '%s\n' "$darwin_kind" | grep -q "arm64" || {
+  echo "snova-lsp-darwin is missing an Apple Silicon slice: $darwin_kind" >&2
+  exit 1
+}
+file "$ROOT/vscode/server/snova-lsp" | grep -q "ELF" || {
+  echo "snova-lsp must be a Linux ELF" >&2
+  exit 1
+}
+file "$ROOT/vscode/server/snova-lsp.exe" | grep -q "PE32" || {
+  echo "snova-lsp.exe must be a Windows PE" >&2
+  exit 1
+}
 
 cd "$ROOT/vscode"
 npm ci
+npx tsc -p .
+node "$ROOT/scripts/check-server-binary.mjs"
 npx --yes @vscode/vsce package -o "$ROOT/dist/snovalang.vsix"
 
 if ! unzip -l "$ROOT/dist/snovalang.vsix" | grep -q "extension/out/extension.js"; then
@@ -41,6 +71,10 @@ printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp' || {
 }
 printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp.exe' || {
   echo "snovalang.vsix is missing extension/server/snova-lsp.exe" >&2
+  exit 1
+}
+printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp-darwin' || {
+  echo "snovalang.vsix is missing extension/server/snova-lsp-darwin" >&2
   exit 1
 }
 
