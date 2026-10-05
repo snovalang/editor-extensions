@@ -80,3 +80,8 @@ VS Code development: `cd vscode && npm ci && npm run compile`.
 Zed development: in Zed, run **zed: install dev extension** and select the `zed/` directory. Grammar revisions are the `rev` fields in `zed/extension.toml`. On Windows, if the host linker reports `msvcrt.lib` missing, build with the GNU toolchain (`zed/build.ps1`).
 
 `install_ide.sh` and `install_ide.ps1` are an optional checklist. They call the same release installers.
+
+## License
+
+This project is licensed under the [Apache License, Version 2.0](LICENSE).
+Copyright 2026 Snovalang contributors. See [NOTICE](NOTICE).
