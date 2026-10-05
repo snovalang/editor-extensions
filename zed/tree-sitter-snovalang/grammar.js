@@ -63,7 +63,7 @@ module.exports = grammar({
           field("name", $.identifier),
           optional($.generic_parameters),
           $.parameter_list,
-          optional(seq(":", $.type)),
+          optional(choice(seq(":", $.type), seq("->", $.type), seq("~>", $.type))),
           optional(choice($.block, seq("=", $.expression))),
         ),
       ),
@@ -78,7 +78,7 @@ module.exports = grammar({
           field("name", $.identifier),
           optional($.generic_parameters),
           $.parameter_list,
-          optional(seq(":", $.type)),
+          optional(choice(seq(":", $.type), seq("->", $.type), seq("~>", $.type))),
           optional($.block),
         ),
       ),
@@ -94,7 +94,7 @@ module.exports = grammar({
           field("name", $.identifier),
           optional($.generic_parameters),
           $.parameter_list,
-          optional(seq(":", $.type)),
+          optional(choice(seq(":", $.type), seq("->", $.type), seq("~>", $.type))),
           optional(choice($.block, seq("=", $.expression))),
         ),
       ),
@@ -132,11 +132,14 @@ module.exports = grammar({
 
     property_accessors: ($) => seq("{", repeat($.property_accessor), "}"),
 
+    // { get; set; } and projections: get: (x) -> expr;
     property_accessor: ($) =>
       seq(
         choice("get", "set"),
-        optional(seq(":", $.type)),
-        optional(choice($.block, seq("=", $.expression))),
+        optional(
+          seq(":", "(", optional(commaSep($.parameter)), ")", "->", $.expression),
+        ),
+        optional(choice(";", ",")),
       ),
 
     statement: ($) =>
@@ -174,12 +177,22 @@ module.exports = grammar({
     for_statement: ($) =>
       seq(
         "for",
-        "(",
-        choice("let", "var"),
-        field("variable", $.identifier),
-        "in",
-        $.expression,
-        ")",
+        choice(
+          seq(
+            "(",
+            choice("let", "var"),
+            field("variable", $.identifier),
+            choice("in", "<~"),
+            $.expression,
+            ")",
+          ),
+          seq(
+            choice("let", "var"),
+            field("variable", $.identifier),
+            choice("in", "<~"),
+            $.expression,
+          ),
+        ),
         $.block,
       ),
 
@@ -200,7 +213,8 @@ module.exports = grammar({
         3,
         seq(
           $.expression,
-          "=>",
+          optional(seq("if", $.expression)),
+          choice("->", "=>"),
           choice($.expression, $.return_statement, $.block),
         ),
       ),
@@ -319,6 +333,7 @@ module.exports = grammar({
               ">=",
               "&&",
               "||",
+              "??",
             ),
           ),
           field("right", $.expression),
@@ -353,7 +368,7 @@ module.exports = grammar({
       ),
 
     qualified_identifier: ($) =>
-      seq($.identifier, repeat(seq(".", $.identifier))),
+      seq($.identifier, repeat(seq(choice(".", "?."), $.identifier))),
 
     identifier: (_) => /[A-Za-z_][A-Za-z0-9_]*/,
 

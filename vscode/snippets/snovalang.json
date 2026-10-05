@@ -1,97 +1,231 @@
 {
-    "Function Declaration": {
-        "prefix": "func",
+    "Main Function": {
+        "prefix": "main",
         "body": [
-            "func ${1:name}(${2:params}): ${3:unit} {",
+            "func main() {",
             "\t$0",
             "}"
         ],
-        "description": "Declares a Snovalang function"
+        "description": "Program entry point"
+    },
+    "Function Declaration": {
+        "prefix": "func",
+        "body": [
+            "func ${1:name}(${2:param}: ${3:int}): ${4:int} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Declares a package-level function"
     },
     "Method Declaration": {
         "prefix": "method",
         "body": [
-            "public method ${1:name}(${2:params}): ${3:unit} {",
+            "public method ${1:name}(${2}): ${3:unit} {",
             "\t$0",
             "}"
         ],
-        "description": "Declares a member method"
+        "description": "Declares a method of a class, struct or interface"
+    },
+    "Constructor": {
+        "prefix": "constructor",
+        "body": [
+            "constructor(${1:name}: ${2:string}) {",
+            "\tthis.${1:name} = ${1:name}",
+            "}"
+        ],
+        "description": "Declares a constructor inside a type"
     },
     "Class Declaration": {
         "prefix": "class",
         "body": [
             "public class ${1:Name} {",
+            "\tprivate var ${2:field}: ${3:string}",
+            "",
+            "\tconstructor(${2:field}: ${3:string}) {",
+            "\t\tthis.${2:field} = ${2:field}",
+            "\t}",
             "\t$0",
             "}"
         ],
-        "description": "Declares a class"
+        "description": "Declares a class with a field and a constructor"
     },
     "Struct Declaration": {
         "prefix": "struct",
         "body": [
             "public struct ${1:Name} {",
-            "\tpublic let ${2:field}: ${3:string}",
+            "\t${2:field}: ${3:int}",
             "\t$0",
             "}"
         ],
-        "description": "Declares a struct"
+        "description": "Declares a struct; build it with `Name { field: value }`"
     },
     "Enum Declaration": {
         "prefix": "enum",
         "body": [
             "public enum ${1:Name} {",
-            "\t${2:Variant1},",
-            "\t${3:Variant2}(${4:payload}: ${5:string})",
+            "\t${2:First}",
+            "\t${3:Second}(${4:value}: ${5:int})",
             "}"
         ],
-        "description": "Declares an enum tagged union"
+        "description": "Declares an enum; variants go one per line, without commas"
+    },
+    "Interface Declaration": {
+        "prefix": "interface",
+        "body": [
+            "public interface ${1:Name} {",
+            "\tmethod ${2:name}(): ${3:unit}",
+            "}"
+        ],
+        "description": "Declares an interface"
+    },
+    "If Statement": {
+        "prefix": "if",
+        "body": [
+            "if ${1:condition} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "The condition takes no parentheses"
+    },
+    "If Else": {
+        "prefix": "ifelse",
+        "body": [
+            "if ${1:condition} {",
+            "\t$2",
+            "} else {",
+            "\t$0",
+            "}"
+        ],
+        "description": "if / else"
+    },
+    "While Loop": {
+        "prefix": "while",
+        "body": [
+            "while ${1:condition} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Repeats while the condition holds"
+    },
+    "For In Loop": {
+        "prefix": "for",
+        "body": [
+            "for ${1:item} in ${2:items} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Iterates over a collection"
+    },
+    "For Receive Loop": {
+        "prefix": "forrecv",
+        "body": [
+            "for ${1:value} <~ ${2:channel} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "Receives from a channel until it closes"
     },
     "Match Expression": {
         "prefix": "match",
         "body": [
-            "match ${1:expr} {",
+            "match ${1:value} {",
             "\t${2:pattern} -> ${3:result}",
             "\t_ -> ${4:fallback}",
             "}"
         ],
-        "description": "Pattern matching expression"
+        "description": "Pattern matching; arms are `pattern -> result`"
     },
-    "For Loop": {
-        "prefix": "for",
+    "Try Catch": {
+        "prefix": "try",
         "body": [
-            "for (let ${1:item} in ${2:collection}) {",
+            "try {",
+            "\t$1",
+            "} catch (${2:e}: ${3:Error}) {",
             "\t$0",
             "}"
         ],
-        "description": "Iterates over collection"
+        "description": "try / catch"
     },
-    "Pulsar Stream": {
+    "Try Catch Finally": {
+        "prefix": "tryfinally",
+        "body": [
+            "try {",
+            "\t$1",
+            "} catch (${2:e}: ${3:Error}) {",
+            "\t$4",
+            "} finally {",
+            "\t$0",
+            "}"
+        ],
+        "description": "try / catch / finally"
+    },
+    "Print Line": {
+        "prefix": "printline",
+        "body": [
+            "Console.printline(${1:\"$2\"})"
+        ],
+        "description": "Writes a line to standard output (needs `import builtin.console.Console`)"
+    },
+    "Data Class": {
+        "prefix": "dataclass",
+        "body": [
+            "data class ${1:Name} {",
+            "\t${2:field}: ${3:int}",
+            "\t$0",
+            "}"
+        ],
+        "description": "A class whose fields may be written as `name: Type`"
+    },
+    "Extension": {
+        "prefix": "extension",
+        "body": [
+            "extension ${1:Type} {",
+            "\tfunc ${2:name}(): ${3:unit} {",
+            "\t\t$0",
+            "\t}",
+            "}"
+        ],
+        "description": "Adds functions to an existing type; those functions see its fields"
+    },
+    "Type Alias": {
+        "prefix": "typealias",
+        "body": [
+            "type ${1:Name} = ${2:int}"
+        ],
+        "description": "Declares a type alias"
+    },
+    "Property Accessors": {
+        "prefix": "prop",
+        "body": [
+            "private let ${1:name}: ${2:string} { get; set; }"
+        ],
+        "description": "A field with get and set. Omit set for read-only, or write get: (x) -> expr"
+    },
+    "Pulsar Function": {
+        "prefix": "pulsarfunc",
+        "body": [
+            "pulsar func ${1:name}(${2}): ${3:unit} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "A pulsar function. Launch it with pulsar name(...)"
+    },
+    "Async Function": {
+        "prefix": "asyncfunc",
+        "body": [
+            "async func ${1:name}(${2}): ${3:unit} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "An asynchronous function"
+    },
+    "Pulsar Block": {
         "prefix": "pulsar",
         "body": [
-            "pulsar func ${1:worker}(): unit {",
+            "pulsar {",
             "\t$0",
             "}"
         ],
-        "description": "Declares a concurrent pulsar worker"
-    },
-    "HttpServer Definition": {
-        "prefix": "httpserver",
-        "body": [
-            "let server = HttpServer.new()",
-            "server.get(\"${1:/}\", (req, res) -> {",
-            "\tres.status(200).send(\"${2:Hello, Snovalang!}\")",
-            "})",
-            "server.listen(${3:8080})"
-        ],
-        "description": "Create and start a pure Snovalang HTTP server"
-    },
-    "Http Route Handler": {
-        "prefix": "route",
-        "body": [
-            "server.${1|get,post,put,delete|}(\"${2:/path}\", (req, res) -> {",
-            "\t$0",
-            "})"
-        ],
-        "description": "Add an HTTP route handler"
+        "description": "Runs the block as a concurrent task"
     }
 }

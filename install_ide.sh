@@ -42,53 +42,43 @@ print_status "zed" "Zed"
 
 if [[ $SELECTION == *"default"* ]]; then
   echo "Installing Default Snovalang LSP..."
-
-  url="https://github.com/supernovalang/snova-lsp/archive/refs/heads/master.zip"
-  zip_file="/tmp/snova-lsp.zip"
-  tmp_dir="/tmp/snova-lsp-extract"
-  install_dir="$HOME/.local/bin"
-
-  echo "Downloading LSP from $url..."
-  curl -fsSL "$url" -o "$zip_file"
-
-  echo "Extracting LSP..."
-  rm -rf "$tmp_dir"
-  mkdir -p "$tmp_dir"
-  unzip -q "$zip_file" -d "$tmp_dir"
-  rm "$zip_file"
-
-  # O zip do GitHub extrai para uma subpasta snova-lsp-master/
-  extracted=$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -1)
-  if [ -z "$extracted" ]; then
-    echo "ERROR: Could not find extracted folder in $tmp_dir"
-    exit 1
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  CHECKOUT="$(cd "$SCRIPT_DIR/../snova-lsp" 2>/dev/null && pwd -P || true)"
+  INSTALLER=""
+  if [ -n "$CHECKOUT" ]; then
+    INSTALLER="$CHECKOUT/install.sh"
   fi
-
-  # Copia binários para ~/.local/bin (sem sudo)
-  mkdir -p "$install_dir"
-  cp -r "$extracted/." "$install_dir/"
-  rm -rf "$tmp_dir"
-  chmod +x "$install_dir/snova-lsp" 2>/dev/null || true
-
-  echo "Snovalang LSP installed to $install_dir"
-
-  # Adiciona ao PATH se necessário
-  shell_rc=""
-  if [[ -f "$HOME/.zshrc" ]]; then
-    shell_rc="$HOME/.zshrc"
-  elif [[ -f "$HOME/.bashrc" ]]; then
-    shell_rc="$HOME/.bashrc"
-  fi
-
-  if [ -n "$shell_rc" ] && ! grep -q "$install_dir" "$shell_rc"; then
-    echo "export PATH=\"\$PATH:$install_dir\"" >> "$shell_rc"
-    echo "Added $install_dir to PATH in $shell_rc"
-    echo "Run: source $shell_rc  (or open a new terminal)"
+  if [ -n "$INSTALLER" ] && [ -f "$INSTALLER" ]; then
+    bash "$INSTALLER"
+  else
+    echo "Local checkout not found. Running the published installer..."
+    curl -fsSL https://raw.githubusercontent.com/supernovalang/snova-lsp/master/install.sh | bash
   fi
 fi
 if [[ $SELECTION == *"vscode"* ]]; then
   echo "Installing Snovalang extension for VS Code..."
-  # TODO: code --install-extension snovalang.snovalang
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  VSCODE_SRC="$SCRIPT_DIR/vscode"
+  json_field() {
+    sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" "$VSCODE_SRC/package.json" | head -1
+  }
+  PUBLISHER="$(json_field publisher)"
+  NAME="$(json_field name)"
+  VERSION="$(json_field version)"
+  TARGET="${HOME}/.vscode/extensions/${PUBLISHER}.${NAME}-${VERSION}"
+  if [ ! -f "$VSCODE_SRC/out/extension.js" ]; then
+    echo "Compiling the VS Code extension..."
+    (cd "$VSCODE_SRC" && { [ -d node_modules ] || npm install; } && npx tsc -p .)
+  fi
+  rm -rf "$TARGET"
+  mkdir -p "$TARGET"
+  cp "$VSCODE_SRC/package.json" "$VSCODE_SRC/language-configuration.json" "$VSCODE_SRC/README.md" "$TARGET/"
+  cp -R "$VSCODE_SRC/out" "$VSCODE_SRC/snippets" "$VSCODE_SRC/syntaxes" "$TARGET/"
+  if [ -d "$VSCODE_SRC/node_modules" ]; then
+    cp -R "$VSCODE_SRC/node_modules" "$TARGET/"
+  fi
+  echo "Snovalang extension installed to: $TARGET"
+  echo "Restart or reload VS Code to activate."
 fi
 if [[ $SELECTION == *"zed"* ]]; then
   echo "Installing Snovalang extension for Zed..."
@@ -123,9 +113,19 @@ if [[ $SELECTION == *"zed"* ]]; then
   rm -rf "$ZED_EXT_DIR"
   cp -r "$ZED_EXT_SRC" "$ZED_EXT_DIR"
   mkdir -p "$ZED_BIN_DIR"
-  LSP_SOURCE="$SCRIPT_DIR/../snova-lsp/tools/bin/snova-lsp"
-  [ -f "$LSP_SOURCE" ] || LSP_SOURCE="$SCRIPT_DIR/../snova-lsp/build/snova-lsp"
-  if [ -f "$LSP_SOURCE" ]; then
+  LSP_SOURCE=""
+  for candidate in \
+    "$SCRIPT_DIR/../snova-lsp/tools/bin/snova-lsp" \
+    "$SCRIPT_DIR/../snova-lsp/build/snova-lsp" \
+    "${HOME}/.snova/bin/snova-lsp"
+  do
+    if [ -f "$candidate" ]; then
+      dir="$(cd "$(dirname "$candidate")" && pwd -P)"
+      LSP_SOURCE="$dir/$(basename "$candidate")"
+      break
+    fi
+  done
+  if [ -n "$LSP_SOURCE" ]; then
     rm -f "$ZED_BIN_DIR/snova-lsp"
     cp "$LSP_SOURCE" "$ZED_BIN_DIR/snova-lsp"
     chmod +x "$ZED_BIN_DIR/snova-lsp"

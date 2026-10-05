@@ -2,7 +2,7 @@
     "name": "snovalang",
     "displayName": "Snovalang",
     "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "publisher": "aggitech",
     "engines": {
         "vscode": "^1.75.0"
@@ -16,22 +16,22 @@
     "activationEvents": [
         "onLanguage:snova",
         "onLanguage:snova-manifest",
-        "workspaceContains:**/mod.sno",
-        "workspaceContains:**/snova.sno",
-        "workspaceContains:**/snova.toml"
+        "workspaceContains:**/mod.sns",
+        "workspaceContains:**/snova.sns"
     ],
     "contributes": {
         "languages": [
             {
                 "id": "snova",
                 "aliases": ["Snovalang", "snova"],
-                "extensions": [".snova", ".sno"],
+                "extensions": [".snl", ".sns"],
                 "configuration": "./language-configuration.json"
             },
             {
                 "id": "snova-manifest",
-                "aliases": ["Snovalang Manifest", "mod.sno"],
-                "filenames": ["mod.sno", "snova.mod", "snova.sno", "snova.toml", "Snovalang.toml"]
+                "aliases": ["Snovalang Manifest", "mod.sns"],
+                "filenames": ["mod.sns", "snova.sns"],
+                "configuration": "./language-configuration.json"
             }
         ],
         "grammars": [
@@ -59,21 +59,53 @@
                 "category": "Snovalang"
             },
             {
+                "command": "snova.installServer",
+                "title": "Install or Update Language Server",
+                "category": "Snovalang"
+            },
+            {
                 "command": "snova.runFile",
-                "title": "Run Current File (sncli run)",
+                "title": "Run Current File (snl run)",
                 "category": "Snovalang",
                 "icon": "$(play)"
             },
             {
-                "command": "snova.checkProject",
-                "title": "Check Project (sncli check)",
+                "command": "snova.checkFile",
+                "title": "Check Current File (snl check)",
                 "category": "Snovalang"
+            },
+            {
+                "command": "snova.checkProject",
+                "title": "Check Project (snl check --project)",
+                "category": "Snovalang"
+            },
+            {
+                "command": "snova.tidyProject",
+                "title": "Tidy Dependencies (snl tidy)",
+                "category": "Snovalang"
+            },
+            {
+                "command": "snova.getDependencies",
+                "title": "Get Dependencies (snl get)",
+                "category": "Snovalang"
+            }
+        ],
+        "taskDefinitions": [
+            {
+                "type": "snova",
+                "required": ["command"],
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The snl subcommand (run, check, tidy, get)."
+                    }
+                }
             }
         ],
         "menus": {
             "editor/title": [
                 {
-                    "when": "resourceExtname == .snova",
+                    "when": "resourceExtname == .snl",
                     "command": "snova.runFile",
                     "group": "navigation"
                 }
@@ -86,13 +118,53 @@
                 "snova.lsp.serverPath": {
                     "type": "string",
                     "default": "snova-lsp",
-                    "description": "Path to snova-lsp binary executable"
+                    "description": "Path to the snova-lsp executable. The default looks in ~/.snova/bin, a sibling snova-lsp checkout, the workspace's tools/bin and PATH."
+                },
+                "snova.lsp.autoInstall": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Builds or downloads snova-lsp into ~/.snova/bin when the language server is not already installed."
+                },
+                "snova.compilerPath": {
+                    "type": "string",
+                    "default": "snl",
+                    "description": "Path to the `snl` toolchain used by the run/check/tidy/get commands and code lenses."
                 },
                 "snova.trace.server": {
                     "type": "string",
                     "enum": ["off", "messages", "verbose"],
                     "default": "off",
-                    "description": "Traces communication between VS Code and Snovalang LSP"
+                    "description": "Traces communication between VS Code and the Snovalang language server (the server also logs to snova-lsp.log in the temp directory)."
+                },
+                "snova.lsp.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Shows each completion item's score breakdown (base × match × expected type) and logs the ranking to the server's stderr."
+                },
+                "snova.completion.deep": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Offers `value.field` and `value.method()` candidates that have the expected type."
+                },
+                "snova.completion.usePlaceholders": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Inserts parameter-name placeholders when completing a call."
+                },
+                "snova.completion.completeUnimported": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Offers symbols of packages that are not imported yet, adding the `import`."
+                },
+                "snova.completion.budget": {
+                    "type": "number",
+                    "default": 200,
+                    "description": "Maximum number of completion items returned."
+                },
+                "snova.codeLens.references": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Shows an \"N references\" lens above types, functions and methods."
                 }
             }
         }

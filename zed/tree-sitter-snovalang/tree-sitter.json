@@ -7,8 +7,8 @@
       "scope": "source.snovalang",
       "path": ".",
       "file-types": [
-        "snova",
-        "sno"
+        "snl",
+        "sns"
       ],
       "injection-regex": "^snovalang$"
     }

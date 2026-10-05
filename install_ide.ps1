@@ -58,40 +58,17 @@ Print-Status "zed"     "Zed"
 if ($selectedTags -contains "default") {
     Write-Host "Installing Default Snovalang LSP..." -ForegroundColor Cyan
 
-    $url    = "https://github.com/supernovalang/snova-lsp/archive/refs/heads/master.zip"
-    $zip    = "$env:TEMP\snova-lsp.zip"
-    $tmpDir = "$env:TEMP\snova-lsp-extract"
-    $installDir = "$env:LOCALAPPDATA\snova-lsp\bin"
-
-    Write-Host "Downloading LSP from $url..."
-    Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing
-
-    Write-Host "Extracting LSP..."
-    if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir }
-    Expand-Archive -Path $zip -DestinationPath $tmpDir -Force
-    Remove-Item $zip
-
-    # O zip do GitHub extrai para uma subpasta snova-lsp-master/
-    $extracted = Get-ChildItem $tmpDir -Directory | Select-Object -First 1
-    if (-not $extracted) {
-        Write-Host "ERROR: Could not find extracted folder in $tmpDir" -ForegroundColor Red
-        exit 1
-    }
-
-    # Copia para o diretório de instalação (sem admin)
-    if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
-    New-Item -ItemType Directory -Force -Path $installDir | Out-Null
-    Copy-Item -Recurse -Force "$($extracted.FullName)\*" $installDir
-    Remove-Item -Recurse -Force $tmpDir
-
-    Write-Host "Snovalang LSP installed to $installDir" -ForegroundColor Green
-
-    # Adiciona ao PATH do usuário (sem admin)
-    $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
-    if ($userPath -notlike "*$installDir*") {
-        [Environment]::SetEnvironmentVariable("PATH", "$userPath;$installDir", "User")
-        Write-Host "Added $installDir to user PATH." -ForegroundColor Green
-        Write-Host "Restart your terminal for PATH changes to take effect." -ForegroundColor Yellow
+    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+    $installer = [System.IO.Path]::GetFullPath((Join-Path $scriptDir "..\snova-lsp\install.ps1"))
+    if (Test-Path -LiteralPath $installer) {
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } else {
+        Write-Host "Local checkout not found. Running the published installer..." -ForegroundColor Yellow
+        $published = Join-Path $env:TEMP "snova-lsp-install.ps1"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/supernovalang/snova-lsp/master/install.ps1" -OutFile $published -UseBasicParsing
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $published
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
 }
 if ($selectedTags -contains "vscode") {
@@ -99,7 +76,27 @@ if ($selectedTags -contains "vscode") {
 
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     $vsCodeSrc = Join-Path $scriptDir "vscode"
-    $targetDir = Join-Path $env:USERPROFILE ".vscode\extensions\supernovalang.snovalang-0.1.0"
+    $pkg = Get-Content -LiteralPath (Join-Path $vsCodeSrc "package.json") -Raw | ConvertFrom-Json
+    $targetDir = Join-Path $env:USERPROFILE ".vscode\extensions\$($pkg.publisher).$($pkg.name)-$($pkg.version)"
+
+    $outJs = Join-Path $vsCodeSrc "out\extension.js"
+    if (-not (Test-Path -LiteralPath $outJs)) {
+        Write-Host "Compiling the VS Code extension..." -ForegroundColor Cyan
+        Push-Location $vsCodeSrc
+        try {
+            if (-not (Test-Path -LiteralPath "node_modules")) {
+                & npm install
+                if ($LASTEXITCODE -ne 0) { throw "npm install failed in $vsCodeSrc" }
+            }
+            & npx --no-install tsc -p .
+            if ($LASTEXITCODE -ne 0) {
+                & npx tsc -p .
+                if ($LASTEXITCODE -ne 0) { throw "tsc failed in $vsCodeSrc" }
+            }
+        } finally {
+            Pop-Location
+        }
+    }
 
     if (Test-Path $targetDir) {
         Remove-Item -Recurse -Force $targetDir
@@ -146,11 +143,13 @@ if ($selectedTags -contains "zed") {
     if (Test-Path $zedExtDir) { Remove-Item -Recurse -Force $zedExtDir }
     Copy-Item -Recurse -Force $zedExtensionSrc $zedExtDir
     New-Item -ItemType Directory -Force -Path $zedBinDir | Out-Null
-    $lspSource = Join-Path $scriptDir "..\snova-lsp\tools\bin\snova-lsp.exe"
-    if (-not (Test-Path $lspSource)) {
-        $lspSource = Join-Path $scriptDir "..\snova-lsp\build\snova-lsp.exe"
-    }
-    if (Test-Path $lspSource) {
+    $lspCandidates = @(
+        (Join-Path $scriptDir "..\snova-lsp\tools\bin\snova-lsp.exe"),
+        (Join-Path $scriptDir "..\snova-lsp\build\snova-lsp.exe"),
+        (Join-Path $env:USERPROFILE ".snova\bin\snova-lsp.exe")
+    ) | ForEach-Object { [System.IO.Path]::GetFullPath($_) }
+    $lspSource = $lspCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+    if ($lspSource) {
         $installedLsp = Join-Path $zedBinDir "snova-lsp.exe"
         if (Test-Path $installedLsp) { Remove-Item -Force $installedLsp }
         Copy-Item -Force $lspSource $installedLsp

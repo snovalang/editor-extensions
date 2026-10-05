@@ -1,18 +1,18 @@
 id = "snovalang"
 name = "Snovalang"
-version = "0.1.0"
+version = "0.2.0"
 schema_version = 1
 authors = ["Aggitech Team <dev@aggitech.com>"]
 description = "Snovalang language support and LSP integration for Zed editor"
 repository = "https://github.com/supernovalang/editor-extensions"
 
 [grammars.snovalang]
-repository = "file:///C:/Users/yurimoinhos/Desktop/Projetos/Snovalang/editor-extensions"
+repository = "https://github.com/supernovalang/editor-extensions"
 path = "zed/tree-sitter-snovalang"
 rev = "master"
 
 [grammars.snovalang_manifest]
-repository = "file:///C:/Users/yurimoinhos/Desktop/Projetos/Snovalang/editor-extensions"
+repository = "https://github.com/supernovalang/editor-extensions"
 path = "zed/tree-sitter-snovalang-manifest"
 rev = "master"
 

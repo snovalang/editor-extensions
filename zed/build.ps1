@@ -79,11 +79,13 @@ if ($Install) {
     }
     $zedBinDir = "$zedRoot\tools\bin"
     New-Item -ItemType Directory -Force -Path $zedBinDir | Out-Null
-    $lspSource = Join-Path $scriptDir "..\..\snova-lsp\tools\bin\snova-lsp.exe"
-    if (-not (Test-Path $lspSource)) {
-        $lspSource = Join-Path $scriptDir "..\..\snova-lsp\build\snova-lsp.exe"
-    }
-    if (Test-Path $lspSource) {
+    $lspCandidates = @(
+        (Join-Path $scriptDir "..\..\snova-lsp\tools\bin\snova-lsp.exe"),
+        (Join-Path $scriptDir "..\..\snova-lsp\build\snova-lsp.exe"),
+        (Join-Path $env:USERPROFILE ".snova\bin\snova-lsp.exe")
+    ) | ForEach-Object { [System.IO.Path]::GetFullPath($_) }
+    $lspSource = $lspCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+    if ($lspSource) {
         $targetLsp = Join-Path $zedBinDir "snova-lsp.exe"
         if (Test-Path $targetLsp) {
             try {

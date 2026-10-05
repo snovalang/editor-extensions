@@ -5,7 +5,9 @@
     "patterns": [
         { "include": "#comments" },
         { "include": "#strings" },
+        { "include": "#chars" },
         { "include": "#numbers" },
+        { "include": "#declarations" },
         { "include": "#keywords" },
         { "include": "#types" },
         { "include": "#decorators" },
@@ -35,7 +37,7 @@
                     "patterns": [
                         {
                             "name": "constant.character.escape.snova",
-                            "match": "\\\\."
+                            "match": "\\\\.|\\$\\$"
                         },
                         {
                             "name": "meta.interpolation.snova",
@@ -49,19 +51,66 @@
                 }
             ]
         },
+        "chars": {
+            "patterns": [
+                {
+                    "name": "string.quoted.single.snova",
+                    "match": "'(?:\\\\.|[^'\\\\\\n])'",
+                    "captures": {
+                        "0": { "patterns": [{ "name": "constant.character.escape.snova", "match": "\\\\." }] }
+                    }
+                }
+            ]
+        },
         "numbers": {
             "patterns": [
                 {
-                    "name": "constant.numeric.decimal.snova",
-                    "match": "\\b\\d+(\\.\\d+)?(d|D)?\\b"
+                    "name": "constant.numeric.hex.snova",
+                    "match": "\\b0[xX][0-9a-fA-F_]+[lL]?\\b"
                 },
                 {
-                    "name": "constant.numeric.hex.snova",
-                    "match": "\\b0x[0-9a-fA-F]+\\b"
+                    "name": "constant.numeric.float.snova",
+                    "match": "\\b\\d[\\d_]*(\\.\\d[\\d_]*)?([eE][+-]?\\d+)?[dD]?\\b"
                 },
                 {
                     "name": "constant.numeric.integer.snova",
-                    "match": "\\b\\d+(L|l)?\\b"
+                    "match": "\\b\\d[\\d_]*[lL]?\\b"
+                }
+            ]
+        },
+        "declarations": {
+            "patterns": [
+                {
+                    "match": "\\b(?:data\\s+|abstract\\s+)?(class|struct|enum|interface)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "keyword.declaration.snova" },
+                        "2": { "name": "entity.name.type.snova" }
+                    }
+                },
+                {
+                    "match": "\\b(func|method)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "keyword.declaration.snova" },
+                        "2": { "name": "entity.name.function.snova" }
+                    }
+                },
+                {
+                    "match": "\\b(package|import)\\s+([A-Za-z_][A-Za-z0-9_.]*)",
+                    "captures": {
+                        "1": { "name": "keyword.other.import.snova" },
+                        "2": { "name": "entity.name.namespace.snova" }
+                    }
+                },
+                {
+                    "match": "^\\s*(?:(?:public|private|protected)\\s+)?(extension|type)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "keyword.declaration.snova" },
+                        "2": { "name": "entity.name.type.snova" }
+                    }
+                },
+                {
+                    "name": "keyword.declaration.constructor.snova",
+                    "match": "\\bconstructor\\b(?=\\s*\\()"
                 }
             ]
         },
@@ -72,16 +121,32 @@
                     "match": "\\bthis\\b"
                 },
                 {
+                    "name": "constant.language.snova",
+                    "match": "\\b(true|false|null)\\b"
+                },
+                {
                     "name": "keyword.control.snova",
-                    "match": "\\b(if|else|while|for|in|match|return|break|continue|try|catch|throw|defer|await)\\b"
+                    "match": "\\b(if|else|while|for|in|match|return|break|continue|try|catch|finally|throw|defer|await)\\b"
                 },
                 {
                     "name": "keyword.declaration.snova",
-                    "match": "\\b(package|import|class|struct|enum|interface|func|method|let|var|const|extension|typealias)\\b"
+                    "match": "\\b(package|import|class|struct|enum|interface|func|method|let|var|const|extension|extends|implements)\\b"
+                },
+                {
+                    "name": "storage.modifier.snova",
+                    "match": "\\b(public|private|protected|override|static|async|abstract|data|unsafe|sealed|final|open|internal)\\b"
                 },
                 {
                     "name": "keyword.other.snova",
-                    "match": "\\b(public|private|protected|override|static|async|pulsar|new|as|is|true|false)\\b"
+                    "match": "\\b(pulsar|new|as|is|constructor)\\b"
+                },
+                {
+                    "name": "keyword.other.accessor.snova",
+                    "match": "\\b(get|set)(?=\\s*[:;,{])"
+                },
+                {
+                    "name": "variable.language.wildcard.snova",
+                    "match": "\\b_\\b"
                 }
             ]
         },
@@ -89,11 +154,11 @@
             "patterns": [
                 {
                     "name": "support.type.primitive.snova",
-                    "match": "\\b(int|long|double|decimal|string|bool|unit)\\b"
+                    "match": "\\b(int|int8|int16|int32|int64|int128|long|byte|double|float|decimal|string|char|bool|any|unit)\\b"
                 },
                 {
                     "name": "support.type.core.snova",
-                    "match": "\\b(Option|Result|Some|None|Ok|Err|Array|Map|List|Set|Task|Channel|ByteBuffer)\\b"
+                    "match": "\\b(Option|Result|Partial|Array|Map|Channel|Console)\\b"
                 },
                 {
                     "name": "entity.name.type.snova",
@@ -105,7 +170,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.decorator.snova",
-                    "match": "@[a-zA-Z0-9_]+"
+                    "match": "@[a-zA-Z_][a-zA-Z0-9_]*"
                 }
             ]
         },
@@ -113,7 +178,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.snova",
-                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*\\()"
+                    "match": "\\b([a-z_][a-zA-Z0-9_]*)(?=\\s*\\()"
                 }
             ]
         },
@@ -121,7 +186,7 @@
             "patterns": [
                 {
                     "name": "keyword.operator.snova",
-                    "match": "(\\+|-|\\*|/|%|=|==|!=|<|>|<=|>=|&&|\\|\\||!|\\?|\\?\\?|\\?\\.|->|~>|<~|=>|\\+=|-=|\\*=|/=)"
+                    "match": "(\\?\\?|\\?\\.|->|~>|<~|=>|::|==|!=|<=|>=|&&|\\|\\||\\+=|-=|\\*=|/=|[-+*/%=<>!?&|^~])"
                 }
             ]
         }

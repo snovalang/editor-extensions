@@ -45,6 +45,10 @@
     "try"
     "catch"
     "throw"
+    "finally"
+    "constructor"
+    "open"
+    "type"
     "as"
     "is"))
 
@@ -151,8 +155,11 @@
   "||"
   "!"
   "->"
+  "~>"
   "<~"
   "=>"
+  "??"
+  "?."
   "?"
   "~"
   "&"
