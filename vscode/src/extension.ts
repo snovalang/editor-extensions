@@ -19,6 +19,14 @@ import {
   Uri,
 } from "vscode";
 import {
+  bundledServerFileName,
+  chooseServerBinary,
+  headerMatchesHost,
+  serverHost,
+  type ServerCandidate,
+  type ServerHost,
+} from "./serverBinary";
+import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
@@ -29,7 +37,7 @@ import type * as lsp from "vscode-languageclient";
 
 let client: LanguageClient | undefined;
 
-const MANIFESTS = ["mod.sns", "snova.sns"];
+const MANIFESTS = ["mod.sns", "snova.sns", "snova.mod", "snova.toml", "Snovalang.toml"];
 
 /** The `{ path, project }` argument the server's code lenses carry. */
 interface PathArgs {
@@ -43,6 +51,9 @@ function exe(name: string): string {
 
 const LSP_REPO = "https://github.com/supernovalang/snova-lsp.git";
 const SNOVAC_REPO = "https://github.com/snovalang/snovac.git";
+
+const HOST_MISS =
+  "Snovalang could not find a language server for this operating system. On macOS the extension starts server/snova-lsp-darwin and does not launch the Linux or Windows binary.";
 
 /** Absolute path with `..` and symlinks resolved. Never returns a relative path. */
 function canonical(file: string): string | undefined {
@@ -105,30 +116,63 @@ function nearbyBinaries(roots: string[]): string[] {
   return found;
 }
 
-/** Absolute path of an installed server, or undefined when nothing is on disk. */
-function resolveServerBinary(configuredPath: string, roots: string[] = []): string | undefined {
-  if (configuredPath && configuredPath !== "snova-lsp") {
-    return existingFile(configuredPath);
+function readHeader(filePath: string): Buffer | null {
+  let fd: number | null = null;
+  try {
+    fd = fs.openSync(filePath, "r");
+    const header = Buffer.alloc(4);
+    const read = fs.readSync(fd, header, 0, 4, 0);
+    return read === 4 ? header : null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== null) fs.closeSync(fd);
   }
+}
 
-  const binaryName = exe("snova-lsp");
+function candidatePaths(extensionPath: string, host: ServerHost, roots: string[]): string[] {
+  const installedName = host === "win32" ? "snova-lsp.exe" : "snova-lsp";
   const home = os.homedir();
   const localAppData = process.env.LOCALAPPDATA || "";
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || "";
-
-  const candidates = [
-    path.join(home, ".snova", "bin", binaryName),
-    path.join(localAppData, "snova-lsp", "bin", binaryName),
-    path.join(localAppData, "Zed", "tools", "bin", binaryName),
-    path.join(workspaceRoot, "tools", "bin", binaryName),
+  return [
+    path.join(extensionPath, "server", bundledServerFileName(host)),
+    path.join(home, ".snova", "bin", installedName),
+    path.join(localAppData, "snova-lsp", "bin", installedName),
+    path.join(localAppData, "Zed", "tools", "bin", installedName),
+    path.join(workspaceRoot, "tools", "bin", installedName),
     ...nearbyBinaries(roots.length ? roots : [workspaceRoot]),
   ];
+}
 
-  for (const candidate of candidates) {
-    const found = existingFile(candidate);
-    if (found) return found;
+/** First absolute binary whose header can run on this host. macOS never selects ELF or PE. */
+function resolveCompatible(extensionPath: string, roots: string[]): string | null {
+  const host = serverHost(process.platform);
+  const listed = candidatePaths(extensionPath, host, roots);
+  const onPath = commandOnPath(host === "win32" ? "snova-lsp.exe" : "snova-lsp");
+  if (onPath) listed.push(onPath);
+  const candidates: ServerCandidate[] = listed.map((filePath) => ({
+    path: filePath,
+    header: readHeader(filePath),
+  }));
+  const chosen = chooseServerBinary(host, candidates);
+  if (!chosen) return null;
+  return existingFile(chosen) ?? null;
+}
+
+function explicitServer(configuredPath: string): string {
+  const host = serverHost(process.platform);
+  const found = existingFile(configuredPath);
+  if (!found) {
+    throw new Error(`snova.lsp.serverPath does not exist: ${configuredPath}`);
   }
-  return commandOnPath(binaryName);
+  const header = readHeader(found);
+  if (!header || !headerMatchesHost(host, header)) {
+    throw new Error(
+      `snova.lsp.serverPath is not an executable for this operating system: ${configuredPath}. On macOS the extension starts a universal Mach-O binary and does not launch the Linux ELF or the Windows executable.`
+    );
+  }
+  return found;
 }
 
 function isLspCheckout(dir: string): boolean {
@@ -256,8 +300,9 @@ async function ensureUserPath(dir: string, log: OutputChannel): Promise<void> {
 }
 
 /**
- * Returns the server binary, building or cloning it into ~/.snova/bin when it
- * is not already installed. `force` rebuilds even when a binary is present.
+ * Returns a server binary this host can execute. The bundled executable wins.
+ * A custom `snova.lsp.serverPath` is used only when its header matches the host.
+ * `snova.lsp.autoInstall` builds into ~/.snova/bin when nothing compatible is present.
  */
 async function ensureServer(context: ExtensionContext, log: OutputChannel, force: boolean): Promise<string> {
   const config = workspace.getConfiguration("snova");
@@ -265,14 +310,25 @@ async function ensureServer(context: ExtensionContext, log: OutputChannel, force
   const roots = [context.extensionPath, ...(workspace.workspaceFolders ?? []).map((f) => f.uri.fsPath)];
   const explicit = !!configured && configured !== "snova-lsp";
 
+  if (explicit) {
+    return explicitServer(configured);
+  }
+
+  const host = serverHost(process.platform);
+  const bundledPath = path.join(context.extensionPath, "server", bundledServerFileName(host));
+  const bundledHeader = readHeader(bundledPath);
+  const bundled =
+    bundledHeader && headerMatchesHost(host, bundledHeader) ? existingFile(bundledPath) : undefined;
+  if (bundled) {
+    if (force) log.appendLine(`Using bundled language server ${bundled}`);
+    return bundled;
+  }
+
   if (!force) {
-    const found = resolveServerBinary(configured, roots);
+    const found = resolveCompatible(context.extensionPath, roots);
     if (found) return found;
-    if (explicit) {
-      throw new Error(`snova.lsp.serverPath does not exist: ${configured}`);
-    }
     if (!config.get<boolean>("lsp.autoInstall", true)) {
-      throw new Error("snova-lsp was not found. Enable snova.lsp.autoInstall or set snova.lsp.serverPath.");
+      throw new Error(HOST_MISS);
     }
   }
 
@@ -282,17 +338,21 @@ async function ensureServer(context: ExtensionContext, log: OutputChannel, force
       const checkout = findLspCheckout(roots);
       let built: string | undefined;
       if (checkout) {
-        progress.report({ message: "Building the language server from the local checkout…" });
+        progress.report({ message: "Building the language server from the local checkout..." });
         log.appendLine(`Building ${checkout}`);
         await ensureSnovac(checkout, log);
         await runMake(checkout, log);
         built = builtBinary(checkout);
       } else {
-        progress.report({ message: "Downloading and building the language server…" });
+        progress.report({ message: "Downloading and building the language server..." });
         built = await cloneAndBuild(log);
       }
       if (!built) throw new Error("The build finished without producing snova-lsp.");
       const dest = installBinary(built);
+      const installedHeader = readHeader(dest);
+      if (!installedHeader || !headerMatchesHost(host, installedHeader)) {
+        throw new Error(HOST_MISS);
+      }
       try {
         await ensureUserPath(path.dirname(dest), log);
       } catch (error) {
@@ -313,7 +373,7 @@ function compilerPath(): string {
   return fs.existsSync(installed) ? installed : "snl";
 }
 
-/** The directory of the nearest mod.sns / snova.sns above `file`, if any. */
+/** The directory of the nearest project manifest above `file`, if any. */
 function findProject(file: string): string | undefined {
   let dir = path.dirname(file);
   for (;;) {
@@ -377,7 +437,7 @@ function startClient(serverPath: string): LanguageClient {
   const config = workspace.getConfiguration("snova");
   const traceServer = config.get<string>("trace.server", "off");
 
-  const args: string[] = [];
+  const args: string[] = ["--stdio"];
   if (traceServer !== "off") {
     args.push("--log", path.join(os.tmpdir(), "snova-lsp.log"));
   }
@@ -394,7 +454,9 @@ function startClient(serverPath: string): LanguageClient {
       { scheme: "file", language: "snova-manifest" },
     ],
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher("**/{*.snl,*.sns}"),
+      fileEvents: workspace.createFileSystemWatcher(
+        "**/{*.snl,*.sns,mod.sns,snova.mod,snova.sns,snova.toml,Snovalang.toml}"
+      ),
     },
     initializationOptions: {
       debug: config.get<boolean>("lsp.debug", false),
@@ -448,7 +510,6 @@ export async function activate(context: ExtensionContext) {
       await client.stop();
     }
     try {
-      // A fresh client picks up changed settings (they travel as initializationOptions).
       client = await boot(false);
       window.showInformationMessage("Snovalang Language Server restarted.");
     } catch (err) {
@@ -467,7 +528,6 @@ export async function activate(context: ExtensionContext) {
     }
   });
 
-  // Commands the server's code lenses invoke.
   register("snova.run", (args?: PathArgs) => {
     const { file, project } = targetOf(args);
     if (!requireFile(file, "run")) return;
@@ -517,7 +577,6 @@ export async function activate(context: ExtensionContext) {
     }
   );
 
-  // Palette / editor-title commands, on the active file.
   register("snova.runFile", () => commands.executeCommand("snova.run"));
   register("snova.checkFile", () => {
     const { file } = targetOf(undefined);

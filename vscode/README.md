@@ -1,32 +1,35 @@
 # Snovalang — VS Code Extension
 
-Extensão do Snovalang para Visual Studio Code, com realce de sintaxe e cliente do `snova-lsp`.
+Syntax highlighting, snippets, and a language client for Snovalang.
 
-## Funcionalidades
+## Install
 
-- Realce TextMate para `.snl` e `.sns`, incluindo `data class`, `extension`, modificadores (`unsafe`, `sealed`, `final`, `open`, `internal`) e acessores `get`/`set`.
-- Language Server: completion, diagnósticos, hover, go to definition e document symbols.
-- Snippets para `data class`, `extension`, alias `type`, propriedade com acessores, `pulsar func` e `async func`.
-- Instalação automática do language server quando o binário não está no PATH.
+Linux and macOS:
 
-## Language server
-
-Ao abrir um arquivo `.snl` ou `.sns`, a extensão procura `snova-lsp` nesta ordem:
-
-1. `snova.lsp.serverPath`, quando o valor não é o padrão `snova-lsp` e o arquivo existe.
-2. `~/.snova/bin`, o diretório local da extensão, `tools/bin` ou `build` de um checkout vizinho, e o PATH.
-3. Se nada for encontrado e `snova.lsp.autoInstall` estiver ligado (padrão), a extensão compila o checkout local ou clona `snova-lsp` e `snovac` e instala o binário em `~/.snova/bin`.
-
-O comando **Snovalang: Install or Update Language Server** força essa instalação. Um `snova.lsp.serverPath` explícito que não existe não é substituído.
-
-Manifestos `mod.sns` e `snova.sns` usam a gramática de manifesto e não são enviados ao compilador como código.
-
-## Instalação manual
-
-Na raiz de `editor-extensions`:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File install_ide.ps1
+```sh
+curl -fsSL https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-vscode.sh | sh
 ```
 
-A opção "Default Snovalang LSP" executa `../snova-lsp/install.ps1`, que coloca `snova-lsp.exe` em `%USERPROFILE%\.snova\bin`.
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-vscode.ps1 | iex
+```
+
+The script downloads the latest [`snovalang.vsix`](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) and runs `code --install-extension snovalang.vsix`.
+
+From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
+
+## Use
+
+- On macOS the extension starts the universal Mach-O `server/snova-lsp-darwin` and does not launch the Linux ELF or the Windows executable. Linux starts `server/snova-lsp`. Windows starts `server/snova-lsp.exe`.
+- A `snova.lsp.serverPath` value other than `snova-lsp` is used only when that file exists and its executable header matches the host.
+- When no compatible binary is found and `snova.lsp.autoInstall` is on (the default), the extension builds `snova-lsp` into `~/.snova/bin`. **Snovalang: Install or Update Language Server** uses the bundled server when the VSIX includes one.
+- Open a `.snl` source or a `.sns` script. `mod.sns` and `snova.sns` use the manifest grammar.
+- **Snovalang: Run Current File** runs `snl run`.
+- **Snovalang: Check Current File** runs `snl check` on the active file.
+- **Snovalang: Check Project** runs `snl check --project`.
+- **Snovalang: Tidy Dependencies** runs `snl tidy`.
+- **Snovalang: Get Dependencies** runs `snl get`.
+
+Run and check actions call the `snl` compiler (`snova.compilerPath`, or `~/.snova/bin/snl` when that file exists).

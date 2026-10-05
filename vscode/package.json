@@ -4,6 +4,13 @@
     "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
     "version": "0.3.0",
     "publisher": "aggitech",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/snovalang/editor-extensions.git"
+    },
+    "bugs": {
+        "url": "https://github.com/snovalang/editor-extensions/issues"
+    },
     "engines": {
         "vscode": "^1.75.0"
     },
@@ -17,7 +24,8 @@
         "onLanguage:snova",
         "onLanguage:snova-manifest",
         "workspaceContains:**/mod.sns",
-        "workspaceContains:**/snova.sns"
+        "workspaceContains:**/snova.sns",
+        "workspaceContains:**/snova.toml"
     ],
     "contributes": {
         "languages": [
@@ -30,7 +38,7 @@
             {
                 "id": "snova-manifest",
                 "aliases": ["Snovalang Manifest", "mod.sns"],
-                "filenames": ["mod.sns", "snova.sns"],
+                "filenames": ["mod.sns", "snova.mod", "snova.sns", "snova.toml", "Snovalang.toml"],
                 "configuration": "./language-configuration.json"
             }
         ],
@@ -105,7 +113,7 @@
         "menus": {
             "editor/title": [
                 {
-                    "when": "resourceExtname == .snl",
+                    "when": "resourceExtname == .snl || resourceExtname == .sns",
                     "command": "snova.runFile",
                     "group": "navigation"
                 }
@@ -118,17 +126,17 @@
                 "snova.lsp.serverPath": {
                     "type": "string",
                     "default": "snova-lsp",
-                    "description": "Path to the snova-lsp executable. The default looks in ~/.snova/bin, a sibling snova-lsp checkout, the workspace's tools/bin and PATH."
+                    "description": "Path to the snova-lsp executable. The default starts the bundled server for this operating system: universal Mach-O server/snova-lsp-darwin on macOS, server/snova-lsp on Linux, and server/snova-lsp.exe on Windows. A custom path is used only when that file exists and its header matches the host."
                 },
                 "snova.lsp.autoInstall": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Builds or downloads snova-lsp into ~/.snova/bin when the language server is not already installed."
+                    "description": "When no bundled or installed snova-lsp matches this operating system, build or download one into ~/.snova/bin."
                 },
                 "snova.compilerPath": {
                     "type": "string",
                     "default": "snl",
-                    "description": "Path to the `snl` toolchain used by the run/check/tidy/get commands and code lenses."
+                    "description": "Path to the snl toolchain used by the run, check, tidy, and get commands and by code lenses."
                 },
                 "snova.trace.server": {
                     "type": "string",
@@ -139,12 +147,12 @@
                 "snova.lsp.debug": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Shows each completion item's score breakdown (base × match × expected type) and logs the ranking to the server's stderr."
+                    "description": "Shows each completion item's score breakdown (base x match x expected type) and logs the ranking to the server's stderr."
                 },
                 "snova.completion.deep": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Offers `value.field` and `value.method()` candidates that have the expected type."
+                    "description": "Offers value.field and value.method() candidates that have the expected type."
                 },
                 "snova.completion.usePlaceholders": {
                     "type": "boolean",
@@ -154,7 +162,7 @@
                 "snova.completion.completeUnimported": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Offers symbols of packages that are not imported yet, adding the `import`."
+                    "description": "Offers symbols of packages that are not imported yet, adding the import."
                 },
                 "snova.completion.budget": {
                     "type": "number",

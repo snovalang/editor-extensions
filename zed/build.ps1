@@ -1,10 +1,10 @@
-# build.ps1 — Compila a extensão Zed para Snovalang
-# Compila o componente usado pelo Zed e substitui instalações anteriores.
+# build.ps1 — Windows developer build for the Snovalang Zed extension.
+# End users install the prebuilt archive with install-zed.ps1.
 #
-# Uso:
-#   .\build.ps1              # Build release (padrão)
-#   .\build.ps1 -Debug       # Build debug
-#   .\build.ps1 -Install     # Build + copia para Zed extensions
+# Usage:
+#   .\build.ps1              # Release build (default)
+#   .\build.ps1 -Debug       # Debug build
+#   .\build.ps1 -Install     # Build and copy into the Zed extensions directory
 
 param(
     [switch]$Debug,
@@ -22,7 +22,7 @@ if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) {
 }
 
 # Garante que o target WASM está instalado
-$wasmTarget = "wasm32-wasip1"
+$wasmTarget = "wasm32-wasip2"
 $installed = rustup target list --installed 2>&1
 if ($installed -notmatch $wasmTarget) {
     Write-Host "Installing WASM target $wasmTarget..." -ForegroundColor Cyan
