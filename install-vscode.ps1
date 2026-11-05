@@ -9,6 +9,29 @@ $dest = Join-Path $env:TEMP "snovalang.vsix"
 Write-Host "Downloading $url"
 Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 
+function Install-ServerFromVsix([string]$Archive) {
+    $stage = Join-Path $env:TEMP ("snova-lsp-vsix-" + [guid]::NewGuid().ToString("n"))
+    New-Item -ItemType Directory -Force -Path $stage | Out-Null
+    try {
+        tar -xf $Archive -C $stage "extension/server/snova-lsp.exe"
+        if ($LASTEXITCODE -ne 0) { throw "tar could not read extension/server/snova-lsp.exe" }
+        $exe = Join-Path $stage "extension\server\snova-lsp.exe"
+        if (-not (Test-Path -LiteralPath $exe)) { throw "snova-lsp.exe is not in the VSIX" }
+        $binDir = Join-Path $env:USERPROFILE ".local\bin"
+        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+        Copy-Item -LiteralPath $exe -Destination (Join-Path $binDir "snova-lsp.exe") -Force
+        Write-Host "Installed snova-lsp to $binDir\snova-lsp.exe"
+    } finally {
+        if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+    }
+}
+
+try {
+    Install-ServerFromVsix $dest
+} catch {
+    Write-Host "Could not copy snova-lsp to ~/.local/bin. The extension still starts the server bundled in the VSIX when that binary matches this system."
+}
+
 $cli = $env:VSCODE_CLI
 if (-not $cli) {
     $code = Get-Command code -ErrorAction SilentlyContinue
@@ -25,3 +48,4 @@ Write-Host "Running $cli --install-extension $dest"
 & $cli --install-extension $dest
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host "Snovalang is installed. Reload the window if the editor was already open."
+Write-Host "Diagnostics, completion, and navigation come from snova-lsp."

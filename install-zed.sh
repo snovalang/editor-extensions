@@ -60,5 +60,49 @@ rm -rf "$installed"
 mv "$tmp/snovalang" "$installed"
 rm -f "$ext_root/index.json"
 
+magic_kind() {
+  hex=$(od -An -t x1 -N 4 "$1" 2>/dev/null | tr -d ' \n' | tr 'A-F' 'a-f' || true)
+  case "$hex" in
+    7f454c46*) echo elf ;;
+    4d5a*) echo pe ;;
+    cafebabe*|cafebabf*|feedface*|feedfacf*|cefaedfe*|cffaedfe*|bebafeca*|bfbafeca*) echo macho ;;
+    *) echo unknown ;;
+  esac
+}
+
+copy_server_into_local_bin() {
+  root=$1
+  if [ -z "${HOME:-}" ]; then
+    return 1
+  fi
+  case "$(uname -s)" in
+    Darwin) srcname=snova-lsp-darwin; expect=macho; destname=snova-lsp ;;
+    Linux) srcname=snova-lsp; expect=elf; destname=snova-lsp ;;
+    MINGW*|MSYS*|CYGWIN*) srcname=snova-lsp.exe; expect=pe; destname=snova-lsp.exe ;;
+    *) return 1 ;;
+  esac
+  src="$root/server/$srcname"
+  if [ ! -f "$src" ]; then
+    echo "The extension archive has no server/$srcname." >&2
+    return 1
+  fi
+  kind=$(magic_kind "$src")
+  if [ "$kind" != "$expect" ]; then
+    echo "Skipping server/$srcname (header is $kind, want $expect)." >&2
+    return 1
+  fi
+  mkdir -p "$HOME/.local/bin"
+  cp "$src" "$HOME/.local/bin/$destname"
+  chmod 755 "$HOME/.local/bin/$destname"
+  if [ "$expect" != pe ]; then
+    ln -sfn "$destname" "$HOME/.local/bin/snovalang-lsp"
+  fi
+  echo "Installed snova-lsp to $HOME/.local/bin/$destname"
+}
+
+if ! copy_server_into_local_bin "$installed"; then
+  echo "Could not copy snova-lsp to ~/.local/bin. Zed still starts server/ inside the extension when that binary matches this system." >&2
+fi
+
 echo "Installed Snovalang to $installed"
 echo "Restart Zed, or run \"zed: reload extensions\" from the command palette."

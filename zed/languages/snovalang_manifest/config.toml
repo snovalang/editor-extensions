@@ -1,6 +1,6 @@
 name = "Snovalang Manifest"
 grammar = "snovalang_manifest"
-path_suffixes = ["mod.sns", "snova.sns"]
+path_suffixes = ["mod.sns", "snova.sns", "snova.mod", "snova.toml", "Snovalang.toml"]
 line_comments = ["# "]
 brackets = [
   { start = "[", end = "]", close = true, newline = false },

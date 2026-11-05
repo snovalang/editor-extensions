@@ -58,6 +58,8 @@ cd "$ROOT/vscode"
 npm ci
 npx tsc -p .
 node "$ROOT/scripts/check-server-binary.mjs"
+node "$ROOT/scripts/check-lsp-session.mjs"
+node "$ROOT/scripts/check-install-snova-lsp.mjs"
 npx --yes @vscode/vsce package -o "$ROOT/dist/snovalang.vsix"
 
 if ! unzip -l "$ROOT/dist/snovalang.vsix" | grep -q "extension/out/extension.js"; then
