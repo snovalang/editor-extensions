@@ -3,7 +3,7 @@ name = "Snovalang"
 version = "0.3.0"
 schema_version = 1
 authors = ["Aggitech Team <dev@aggitech.com>"]
-description = "Snovalang language support and LSP integration for Zed editor"
+description = "Snovalang language support using the snova-lsp language server"
 repository = "https://github.com/snovalang/editor-extensions"
 
 [grammars.snovalang]

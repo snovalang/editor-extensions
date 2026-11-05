@@ -59,17 +59,13 @@ if ($selectedTags -contains "default") {
     Write-Host "Installing Default Snovalang LSP..." -ForegroundColor Cyan
 
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-    $installer = [System.IO.Path]::GetFullPath((Join-Path $scriptDir "..\snova-lsp\install.ps1"))
-    if (Test-Path -LiteralPath $installer) {
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    } else {
-        Write-Host "Local checkout not found. Running the published installer..." -ForegroundColor Yellow
-        $published = Join-Path $env:TEMP "snova-lsp-install.ps1"
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/supernovalang/snova-lsp/master/install.ps1" -OutFile $published -UseBasicParsing
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $published
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:SNOVA_LSP_BUNDLE_DIR = Join-Path $scriptDir "vscode\server"
+    $sibling = [System.IO.Path]::GetFullPath((Join-Path $scriptDir "..\snova-lsp"))
+    if (Test-Path (Join-Path $sibling "src\lsp_transport.c")) {
+        $env:SNOVA_LSP_CHECKOUT = $sibling
     }
+    & "$scriptDir\scripts\install-snova-lsp.ps1"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 if ($selectedTags -contains "vscode") {
     Write-Host "Installing Snovalang extension for VS Code..." -ForegroundColor Cyan

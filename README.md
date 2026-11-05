@@ -2,7 +2,9 @@
 
 Syntax highlighting, snippets, and language-server support for Snovalang in VS Code and Zed.
 
-Run and check actions call the installed compiler command, `snl`. Diagnostics, hover, and completion use the language server bundled in the VS Code extension. On macOS that binary is the universal Mach-O `server/snova-lsp-darwin` (Apple Silicon and Intel). The extension does not launch the Linux ELF `snova-lsp` or the Windows `snova-lsp.exe` on macOS. A `snova-lsp` whose executable header matches the host is the fallback.
+Diagnostics, hover, completion, signature help, and navigation come from [snova-lsp](https://github.com/snovalang/snova-lsp). Each editor starts one server process per workspace, in the background, when a Snovalang file is opened. Run and check actions still call the installed compiler command, `snl`.
+
+The extension ships the server binary: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. Installers also copy the host binary to `~/.local/bin`, the directory `make install` uses in snova-lsp (`PREFIX=$HOME/.local`). If no shipped binary matches the machine, the extension clones `https://github.com/snovalang/snova-lsp` and runs `make install`. On macOS the extension starts the universal Mach-O binary and does not launch the Linux or Windows executable.
 
 ## VS Code
 
@@ -53,10 +55,10 @@ After the extension is accepted into the [Zed extension repository](https://gith
 - TextMate highlighting for `.snl` sources and `.sns` scripts
 - Manifest highlighting for `mod.sns` and `snova.sns`
 - Bundled language server: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`
-- When no compatible binary is bundled, `snova.lsp.autoInstall` (default on) builds `snova-lsp` into `~/.snova/bin`
+- When no compatible binary is present, `snova.lsp.autoInstall` (default on) runs `make install` from [snova-lsp](https://github.com/snovalang/snova-lsp) into `~/.local/bin`
 - Snippets (`func`, `method`, `class`, `data class`, `extension`, `struct`, `enum`, `match`, `for`, `pulsar`)
 - Language configuration (brackets and auto-closing pairs)
-- Language client for `snova-lsp` over stdio
+- One stdio language client for `snova-lsp` per window. Features follow the server's initialize result (full-document sync, diagnostics, completion, hover, definition, references, symbols, signature help, code actions, semantic tokens)
 - **Snovalang: Run Current File** runs `snl run`
 - **Snovalang: Check Current File** runs `snl check`
 - **Snovalang: Check Project** runs `snl check --project`
@@ -66,7 +68,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 ### Zed ([`zed/`](zed/))
 
 - Tree-sitter highlighting, brackets, indents, and outline
-- Language server integration for `snova-lsp`
+- One `snova-lsp` process per worktree, using the binary shipped in `server/` or `~/.local/bin/snova-lsp`
 
 ## Developing
 

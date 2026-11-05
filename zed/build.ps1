@@ -80,6 +80,9 @@ if ($Install) {
     $zedBinDir = "$zedRoot\tools\bin"
     New-Item -ItemType Directory -Force -Path $zedBinDir | Out-Null
     $lspCandidates = @(
+        (Join-Path $scriptDir "..\vscode\server\snova-lsp.exe"),
+        (Join-Path $scriptDir "server\snova-lsp.exe"),
+        (Join-Path $env:USERPROFILE ".local\bin\snova-lsp.exe"),
         (Join-Path $scriptDir "..\..\snova-lsp\tools\bin\snova-lsp.exe"),
         (Join-Path $scriptDir "..\..\snova-lsp\build\snova-lsp.exe"),
         (Join-Path $env:USERPROFILE ".snova\bin\snova-lsp.exe")

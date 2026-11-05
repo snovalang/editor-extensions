@@ -75,7 +75,15 @@ if ! grep -a -q "zed:api-version" "$wasm"; then
 fi
 
 rm -rf "$PKG"
-mkdir -p "$PKG/grammars" "$PKG/languages"
+mkdir -p "$PKG/grammars" "$PKG/languages" "$PKG/server"
+for bin in snova-lsp snova-lsp.exe snova-lsp-darwin; do
+  if [ ! -f "$ROOT/vscode/server/$bin" ]; then
+    echo "snovalang-zed.tar.gz needs vscode/server/$bin" >&2
+    exit 1
+  fi
+  cp "$ROOT/vscode/server/$bin" "$PKG/server/$bin"
+done
+chmod 755 "$PKG/server/snova-lsp" "$PKG/server/snova-lsp-darwin" || true
 
 compile_grammar() {
   name="$1"

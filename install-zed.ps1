@@ -23,6 +23,15 @@ try {
     Move-Item $unpacked $installed
     $index = Join-Path $extRoot "index.json"
     if (Test-Path $index) { Remove-Item -Force $index }
+    $bundled = Join-Path $installed "server\snova-lsp.exe"
+    if (Test-Path -LiteralPath $bundled) {
+        $binDir = Join-Path $env:USERPROFILE ".local\bin"
+        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+        Copy-Item -LiteralPath $bundled -Destination (Join-Path $binDir "snova-lsp.exe") -Force
+        Write-Host "Installed snova-lsp to $binDir\snova-lsp.exe"
+    } else {
+        Write-Host "The archive has no server\snova-lsp.exe. Zed still starts that file when a later package includes it."
+    }
     Write-Host "Installed Snovalang to $installed"
     Write-Host "Restart Zed, or run 'zed: reload extensions' from the command palette."
 } finally {

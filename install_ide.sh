@@ -44,16 +44,11 @@ if [[ $SELECTION == *"default"* ]]; then
   echo "Installing Default Snovalang LSP..."
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
   CHECKOUT="$(cd "$SCRIPT_DIR/../snova-lsp" 2>/dev/null && pwd -P || true)"
-  INSTALLER=""
   if [ -n "$CHECKOUT" ]; then
-    INSTALLER="$CHECKOUT/install.sh"
+    export SNOVA_LSP_CHECKOUT="$CHECKOUT"
   fi
-  if [ -n "$INSTALLER" ] && [ -f "$INSTALLER" ]; then
-    bash "$INSTALLER"
-  else
-    echo "Local checkout not found. Running the published installer..."
-    curl -fsSL https://raw.githubusercontent.com/supernovalang/snova-lsp/master/install.sh | bash
-  fi
+  export SNOVA_LSP_BUNDLE_DIR="$SCRIPT_DIR/vscode/server"
+  bash "$SCRIPT_DIR/scripts/install-snova-lsp.sh"
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $SELECTION == *"vscode"* ]]; then

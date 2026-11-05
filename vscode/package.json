@@ -22,10 +22,7 @@
     "main": "./out/extension.js",
     "activationEvents": [
         "onLanguage:snova",
-        "onLanguage:snova-manifest",
-        "workspaceContains:**/mod.sns",
-        "workspaceContains:**/snova.sns",
-        "workspaceContains:**/snova.toml"
+        "onLanguage:snova-manifest"
     ],
     "contributes": {
         "languages": [
@@ -126,12 +123,12 @@
                 "snova.lsp.serverPath": {
                     "type": "string",
                     "default": "snova-lsp",
-                    "description": "Path to the snova-lsp executable. The default starts the bundled server for this operating system: universal Mach-O server/snova-lsp-darwin on macOS, server/snova-lsp on Linux, and server/snova-lsp.exe on Windows. A custom path is used only when that file exists and its header matches the host."
+                    "description": "Path to the snova-lsp executable. The default uses the server shipped with the extension (universal Mach-O server/snova-lsp-darwin on macOS, server/snova-lsp on Linux, server/snova-lsp.exe on Windows), then ~/.local/bin/snova-lsp from make install. A custom path is used only when that file exists and its header matches this system."
                 },
                 "snova.lsp.autoInstall": {
                     "type": "boolean",
                     "default": true,
-                    "description": "When no bundled or installed snova-lsp matches this operating system, build or download one into ~/.snova/bin."
+                    "description": "When no snova-lsp binary matches this system, clone https://github.com/snovalang/snova-lsp and run make install into ~/.local/bin."
                 },
                 "snova.compilerPath": {
                     "type": "string",
@@ -142,37 +139,7 @@
                     "type": "string",
                     "enum": ["off", "messages", "verbose"],
                     "default": "off",
-                    "description": "Traces communication between VS Code and the Snovalang language server (the server also logs to snova-lsp.log in the temp directory)."
-                },
-                "snova.lsp.debug": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Shows each completion item's score breakdown (base x match x expected type) and logs the ranking to the server's stderr."
-                },
-                "snova.completion.deep": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Offers value.field and value.method() candidates that have the expected type."
-                },
-                "snova.completion.usePlaceholders": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Inserts parameter-name placeholders when completing a call."
-                },
-                "snova.completion.completeUnimported": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Offers symbols of packages that are not imported yet, adding the import."
-                },
-                "snova.completion.budget": {
-                    "type": "number",
-                    "default": 200,
-                    "description": "Maximum number of completion items returned."
-                },
-                "snova.codeLens.references": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Shows an \"N references\" lens above types, functions and methods."
+                    "description": "Traces communication between VS Code and snova-lsp. When tracing is on, the server is started with --log and writes snova-lsp.log in the temp directory."
                 }
             }
         }
@@ -180,7 +147,8 @@
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./"
+        "watch": "tsc -watch -p ./",
+        "test": "npm run compile && node ../scripts/check-server-binary.mjs && node ../scripts/check-lsp-session.mjs && node ../scripts/check-install-snova-lsp.mjs"
     },
     "dependencies": {
         "vscode-languageclient": "^8.1.0"

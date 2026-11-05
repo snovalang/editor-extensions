@@ -22,10 +22,12 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 
 ## Use
 
+- Opening a `.snl` or `.sns` file starts `snova-lsp` in the background. One process serves the window. The editor stays responsive while it initializes.
 - On macOS the extension starts the universal Mach-O `server/snova-lsp-darwin` and does not launch the Linux ELF or the Windows executable. Linux starts `server/snova-lsp`. Windows starts `server/snova-lsp.exe`.
-- A `snova.lsp.serverPath` value other than `snova-lsp` is used only when that file exists and its executable header matches the host.
-- When no compatible binary is found and `snova.lsp.autoInstall` is on (the default), the extension builds `snova-lsp` into `~/.snova/bin`. **Snovalang: Install or Update Language Server** uses the bundled server when the VSIX includes one.
-- Open a `.snl` source or a `.sns` script. `mod.sns` and `snova.sns` use the manifest grammar.
+- A `snova.lsp.serverPath` value other than `snova-lsp` is used only when that file exists and its executable header matches this system.
+- When no compatible binary is found and `snova.lsp.autoInstall` is on (the default), the extension clones [snova-lsp](https://github.com/snovalang/snova-lsp) and runs `make install` into `~/.local/bin`. **Snovalang: Install or Update Language Server** does that on demand and keeps the bundled server if the build fails.
+- Diagnostics, completion, hover, and go-to-definition come from that server. The client does not analyze the buffer itself.
+- Open a `.snl` source or a `.sns` script. `mod.sns`, `snova.sns`, `snova.mod`, `snova.toml`, and `Snovalang.toml` use the manifest grammar.
 - **Snovalang: Run Current File** runs `snl run`.
 - **Snovalang: Check Current File** runs `snl check` on the active file.
 - **Snovalang: Check Project** runs `snl check --project`.
