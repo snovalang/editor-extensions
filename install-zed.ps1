@@ -15,23 +15,40 @@ try {
     Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing
     tar -xzf $archive -C $tmp
     $unpacked = Join-Path $tmp "snovalang"
-    if (-not (Test-Path (Join-Path $unpacked "extension.toml")) -or -not (Test-Path (Join-Path $unpacked "extension.wasm"))) {
-        throw "Archive is missing snovalang/extension.toml or snovalang/extension.wasm"
+    $required = @(
+        "extension.toml",
+        "extension.wasm",
+        "grammars\snovalang.wasm",
+        "grammars\snovalang_manifest.wasm",
+        "languages\snovalang\config.toml",
+        "languages\snovalang_manifest\config.toml",
+        "server\snova-lsp.exe"
+    )
+    foreach ($relativePath in $required) {
+        if (-not (Test-Path -LiteralPath (Join-Path $unpacked $relativePath) -PathType Leaf)) {
+            throw "Archive is incomplete; missing snovalang/$relativePath"
+        }
+    }
+    if ((Get-Item -LiteralPath (Join-Path $unpacked "extension.wasm")).Length -eq 0) {
+        throw "Archive contains an empty extension.wasm"
     }
     New-Item -ItemType Directory -Force -Path (Join-Path $extRoot "installed") | Out-Null
-    if (Test-Path $installed) { Remove-Item -Recurse -Force $installed }
-    Move-Item $unpacked $installed
+    $backup = "$installed.backup.$([guid]::NewGuid().ToString('n'))"
+    if (Test-Path $installed) { Move-Item $installed $backup }
+    try {
+        Move-Item $unpacked $installed
+    } catch {
+        if (Test-Path $backup) { Move-Item $backup $installed }
+        throw
+    }
+    if (Test-Path $backup) { Remove-Item -Recurse -Force $backup }
     $index = Join-Path $extRoot "index.json"
     if (Test-Path $index) { Remove-Item -Force $index }
     $bundled = Join-Path $installed "server\snova-lsp.exe"
-    if (Test-Path -LiteralPath $bundled) {
-        $binDir = Join-Path $env:USERPROFILE ".local\bin"
-        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-        Copy-Item -LiteralPath $bundled -Destination (Join-Path $binDir "snova-lsp.exe") -Force
-        Write-Host "Installed snova-lsp to $binDir\snova-lsp.exe"
-    } else {
-        Write-Host "The archive has no server\snova-lsp.exe. Zed still starts that file when a later package includes it."
-    }
+    $binDir = Join-Path $env:USERPROFILE ".local\bin"
+    New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+    Copy-Item -LiteralPath $bundled -Destination (Join-Path $binDir "snova-lsp.exe") -Force
+    Write-Host "Installed snova-lsp to $binDir\snova-lsp.exe"
     Write-Host "Installed Snovalang to $installed"
     Write-Host "Restart Zed, or run 'zed: reload extensions' from the command palette."
 } finally {
