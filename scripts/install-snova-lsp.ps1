@@ -77,7 +77,7 @@ function Install-File([string]$Source) {
     Write-Host "Installed snova-lsp to $dest"
 }
 
-if ($env:SNOVA_LSP_BIN) {
+if ($env:SNOVA_LSP_BIN -and $env:SNOVA_LSP_FORCE_LATEST -ne "1") {
     if (Test-SnovaLspBinary $env:SNOVA_LSP_BIN) {
         Install-File $env:SNOVA_LSP_BIN
         exit 0
@@ -88,6 +88,9 @@ if ($env:SNOVA_LSP_BIN) {
 
 function Build-Checkout([string]$Checkout) {
     $snovac = Join-Path (Split-Path -Parent $Checkout) "snovac"
+    if ($env:SNOVA_LSP_FORCE_LATEST -eq "1" -and (Test-Path $snovac)) {
+        Remove-Item -Recurse -Force $snovac
+    }
     if (-not (Test-Path (Join-Path $snovac "Makefile"))) {
         git clone --depth 1 https://github.com/snovalang/snovac.git $snovac *>&1 | Out-Host
         if ($LASTEXITCODE -ne 0) { return $false }
@@ -114,8 +117,8 @@ function Build-Checkout([string]$Checkout) {
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
-$checkout = $env:SNOVA_LSP_CHECKOUT
-if (-not $checkout) {
+$checkout = if ($env:SNOVA_LSP_FORCE_LATEST -eq "1") { $null } else { $env:SNOVA_LSP_CHECKOUT }
+if (-not $checkout -and $env:SNOVA_LSP_FORCE_LATEST -ne "1") {
     $sibling = [System.IO.Path]::GetFullPath((Join-Path $repoRoot "..\snova-lsp"))
     if (Test-Path (Join-Path $sibling "src\lsp_transport.c")) { $checkout = $sibling }
 }
@@ -124,14 +127,16 @@ if ($checkout -and -not $env:SNOVA_LSP_NO_BUILD) {
     Write-Host "Build from $checkout failed. Trying a bundled binary."
 }
 
-$bundle = if ($env:SNOVA_LSP_BUNDLE_DIR) { $env:SNOVA_LSP_BUNDLE_DIR } else { Join-Path $repoRoot "vscode\server" }
-$bundled = Join-Path $bundle "snova-lsp.exe"
-if (Test-SnovaLspBinary $bundled) {
-    Install-File $bundled
-    exit 0
+if ($env:SNOVA_LSP_FORCE_LATEST -ne "1") {
+    $bundle = if ($env:SNOVA_LSP_BUNDLE_DIR) { $env:SNOVA_LSP_BUNDLE_DIR } else { Join-Path $repoRoot "vscode\server" }
+    $bundled = Join-Path $bundle "snova-lsp.exe"
+    if (Test-SnovaLspBinary $bundled) {
+        Install-File $bundled
+        exit 0
+    }
 }
 
-if (Test-SnovaLspBinary $dest) {
+if ($env:SNOVA_LSP_FORCE_LATEST -ne "1" -and (Test-SnovaLspBinary $dest)) {
     Write-Host "snova-lsp is already installed at $dest"
     exit 0
 }
@@ -144,6 +149,9 @@ if ($env:SNOVA_LSP_NO_BUILD) {
 $cache = Join-Path $env:USERPROFILE ".cache\snova\src"
 New-Item -ItemType Directory -Force -Path $cache | Out-Null
 $cached = Join-Path $cache "snova-lsp"
+if ($env:SNOVA_LSP_FORCE_LATEST -eq "1" -and (Test-Path $cached)) {
+    Remove-Item -Recurse -Force $cached
+}
 if (-not (Test-Path (Join-Path $cached "src\lsp_transport.c"))) {
     if (Test-Path $cached) { Remove-Item -Recurse -Force $cached }
     git clone --depth 1 https://github.com/snovalang/snova-lsp.git $cached

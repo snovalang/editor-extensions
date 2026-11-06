@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 
 $repo = "snovalang/editor-extensions"
 $url = if ($env:SNOVA_ZED_URL) { $env:SNOVA_ZED_URL } else { "https://github.com/$repo/releases/latest/download/snovalang-zed.tar.gz" }
+$lspInstallerUrl = if ($env:SNOVA_LSP_INSTALLER_URL) { $env:SNOVA_LSP_INSTALLER_URL } else { "https://raw.githubusercontent.com/$repo/master/scripts/install-snova-lsp.ps1" }
 $extRoot = Join-Path $env:LOCALAPPDATA "Zed\extensions"
 $installed = Join-Path $extRoot "installed\snovalang"
 $tmp = Join-Path $env:TEMP ("snovalang-zed-" + [guid]::NewGuid().ToString("n"))
@@ -52,11 +53,43 @@ try {
     if (Test-Path $backup) { Remove-Item -Recurse -Force $backup }
     $index = Join-Path $extRoot "index.json"
     if (Test-Path $index) { Remove-Item -Force $index }
-    $bundled = Join-Path $installed "server\snova-lsp.exe"
     $binDir = Join-Path $env:USERPROFILE ".local\bin"
-    New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-    Copy-Item -LiteralPath $bundled -Destination (Join-Path $binDir "snova-lsp.exe") -Force
-    Write-Host "Installed snova-lsp to $binDir\snova-lsp.exe"
+    $latestLspInstalled = $false
+    if ($env:SNOVA_ZED_SKIP_LSP_UPDATE -ne "1") {
+        try {
+            $lspInstaller = Join-Path $tmp "install-snova-lsp.ps1"
+            Write-Host "Downloading the latest snova-lsp installer from $lspInstallerUrl"
+            Invoke-WebRequest -Uri $lspInstallerUrl -OutFile $lspInstaller -UseBasicParsing
+            $oldForceLatest = $env:SNOVA_LSP_FORCE_LATEST
+            $env:SNOVA_LSP_FORCE_LATEST = "1"
+            try {
+                $hostExe = (Get-Process -Id $PID).Path
+                $quotedInstaller = '"' + $lspInstaller + '"'
+                $child = Start-Process -FilePath $hostExe -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $quotedInstaller) -Wait -PassThru -NoNewWindow
+                $latestLspInstalled = $child.ExitCode -eq 0
+            } finally {
+                if ($null -eq $oldForceLatest) { Remove-Item Env:SNOVA_LSP_FORCE_LATEST -ErrorAction SilentlyContinue }
+                else { $env:SNOVA_LSP_FORCE_LATEST = $oldForceLatest }
+            }
+        } catch {
+            Write-Warning "Could not build the latest snova-lsp: $_"
+        }
+    }
+    if (-not $latestLspInstalled) {
+        $dest = Join-Path $binDir "snova-lsp.exe"
+        $keepExisting = $false
+        if (Test-Path -LiteralPath $dest) {
+            $bytes = [System.IO.File]::ReadAllBytes($dest)
+            $keepExisting = $bytes.Length -ge 2 -and $bytes[0] -eq 0x4D -and $bytes[1] -eq 0x5A
+        }
+        if ($keepExisting) {
+            Write-Host "Keeping the existing snova-lsp at $dest because the latest-source build was unavailable."
+        } else {
+            New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+            Copy-Item -LiteralPath (Join-Path $installed "server\snova-lsp.exe") -Destination $dest -Force
+            Write-Host "Installed the bundled snova-lsp fallback to $dest"
+        }
+    }
     Write-Host "Installed Snovalang to $installed"
     Write-Host "Restart Zed, or run 'zed: reload extensions' from the command palette."
 } finally {

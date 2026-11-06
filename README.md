@@ -4,7 +4,7 @@ Syntax highlighting, snippets, and language-server support for Snovalang in VS C
 
 Diagnostics, hover, completion, signature help, and navigation come from [snova-lsp](https://github.com/snovalang/snova-lsp). Each editor starts one server process per workspace, in the background, when a Snovalang file is opened. Run and check actions still call the installed compiler command, `snl`.
 
-The extension ships the server binary: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. Installers also copy the host binary to `~/.local/bin`, the directory `make install` uses in snova-lsp (`PREFIX=$HOME/.local`). If no shipped binary matches the machine, the extension clones `https://github.com/snovalang/snova-lsp` and runs `make install`. On macOS the extension starts the universal Mach-O binary and does not launch the Linux or Windows executable.
+The extension ships fallback server binaries: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. The Zed installation script attempts a fresh shallow clone and build of the current default branch of `snova-lsp` and installs it to `~/.local/bin`; Zed prefers that installed server over the bundled fallback. If the update cannot be built, the installer keeps or installs a host-compatible bundled binary. On macOS the extension starts the universal Mach-O binary and does not launch the Linux or Windows executable.
 
 ## VS Code
 
@@ -69,7 +69,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 ### Zed ([`zed/`](zed/))
 
 - Tree-sitter highlighting, brackets, indents, and outline
-- One `snova-lsp` process per worktree, using the binary shipped in `server/` or `~/.local/bin/snova-lsp`
+- One `snova-lsp` process per worktree, preferring the latest server installed in `~/.local/bin` and falling back to the bundled host binary
 - A `Snovalang Icons` theme inside the language dev extension provides the `.snl` file icon. Install `zed/` with **zed: install dev extension**, then select **Snovalang Icons** in the icon theme selector.
 
 ## Developing
