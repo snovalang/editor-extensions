@@ -1,165 +1,187 @@
 {
-    "name": "snovalang",
-    "displayName": "Snovalang",
-    "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
-    "version": "0.3.0",
-    "publisher": "aggitech",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/snovalang/editor-extensions.git"
-    },
-    "bugs": {
-        "url": "https://github.com/snovalang/editor-extensions/issues"
-    },
-    "engines": {
-        "vscode": "^1.75.0"
-    },
-    "categories": [
-        "Programming Languages",
-        "Linters",
-        "Snippets"
-    ],
-    "main": "./out/extension.js",
-    "activationEvents": [
-        "onLanguage:snova",
-        "onLanguage:snova-manifest"
-    ],
-    "contributes": {
-        "languages": [
-            {
-                "id": "snova",
-                "aliases": ["Snovalang", "snova"],
-                "extensions": [".snl", ".sns"],
-                "icon": {
-                    "light": "./icons/snovalang-light.png",
-                    "dark": "./icons/snovalang-dark.png"
-                },
-                "configuration": "./language-configuration.json"
-            },
-            {
-                "id": "snova-manifest",
-                "aliases": ["Snovalang Manifest", "mod.sns"],
-                "filenames": ["mod.sns", "snova.mod", "snova.sns", "snova.toml", "Snovalang.toml"],
-                "configuration": "./language-configuration.json"
-            }
+  "name": "snovalang",
+  "displayName": "Snovalang",
+  "description": "Rich language support and IDE-agnostic LSP client for Snovalang",
+  "version": "0.3.1",
+  "publisher": "aggitech",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/snovalang/editor-extensions.git"
+  },
+  "bugs": {
+    "url": "https://github.com/snovalang/editor-extensions/issues"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:snova",
+    "onLanguage:snova-manifest"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "snova",
+        "aliases": [
+          "Snovalang",
+          "snova"
         ],
-        "grammars": [
-            {
-                "language": "snova",
-                "scopeName": "source.snova",
-                "path": "./syntaxes/snovalang.tmLanguage.json"
-            },
-            {
-                "language": "snova-manifest",
-                "scopeName": "source.snova.manifest",
-                "path": "./syntaxes/snovalang-manifest.tmLanguage.json"
-            }
+        "extensions": [
+          ".snl",
+          ".sns"
         ],
-        "snippets": [
-            {
-                "language": "snova",
-                "path": "./snippets/snovalang.json"
-            }
-        ],
-        "commands": [
-            {
-                "command": "snova.restartServer",
-                "title": "Restart Language Server",
-                "category": "Snovalang"
-            },
-            {
-                "command": "snova.installServer",
-                "title": "Install or Update Language Server",
-                "category": "Snovalang"
-            },
-            {
-                "command": "snova.runFile",
-                "title": "Run Current File (snl run)",
-                "category": "Snovalang",
-                "icon": "$(play)"
-            },
-            {
-                "command": "snova.checkFile",
-                "title": "Check Current File (snl check)",
-                "category": "Snovalang"
-            },
-            {
-                "command": "snova.checkProject",
-                "title": "Check Project (snl check --project)",
-                "category": "Snovalang"
-            },
-            {
-                "command": "snova.tidyProject",
-                "title": "Tidy Dependencies (snl tidy)",
-                "category": "Snovalang"
-            },
-            {
-                "command": "snova.getDependencies",
-                "title": "Get Dependencies (snl get)",
-                "category": "Snovalang"
-            }
-        ],
-        "taskDefinitions": [
-            {
-                "type": "snova",
-                "required": ["command"],
-                "properties": {
-                    "command": {
-                        "type": "string",
-                        "description": "The snl subcommand (run, check, tidy, get)."
-                    }
-                }
-            }
-        ],
-        "menus": {
-            "editor/title": [
-                {
-                    "when": "resourceExtname == .snl || resourceExtname == .sns",
-                    "command": "snova.runFile",
-                    "group": "navigation"
-                }
-            ]
+        "icon": {
+          "light": "./icons/snovalang-light.png",
+          "dark": "./icons/snovalang-dark.png"
         },
-        "configuration": {
-            "type": "object",
-            "title": "Snovalang",
-            "properties": {
-                "snova.lsp.serverPath": {
-                    "type": "string",
-                    "default": "snova-lsp",
-                    "description": "Path to the snova-lsp executable. The default uses the server shipped with the extension (universal Mach-O server/snova-lsp-darwin on macOS, server/snova-lsp on Linux, server/snova-lsp.exe on Windows), then ~/.local/bin/snova-lsp from make install. A custom path is used only when that file exists and its header matches this system."
-                },
-                "snova.lsp.autoInstall": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "When no snova-lsp binary matches this system, clone https://github.com/snovalang/snova-lsp and run make install into ~/.local/bin."
-                },
-                "snova.compilerPath": {
-                    "type": "string",
-                    "default": "snl",
-                    "description": "Path to the snl toolchain used by the run, check, tidy, and get commands and by code lenses."
-                },
-                "snova.trace.server": {
-                    "type": "string",
-                    "enum": ["off", "messages", "verbose"],
-                    "default": "off",
-                    "description": "Traces communication between VS Code and snova-lsp. When tracing is on, the server is started with --log and writes snova-lsp.log in the temp directory."
-                }
-            }
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "snova-manifest",
+        "aliases": [
+          "Snovalang Manifest",
+          "mod.sns"
+        ],
+        "filenames": [
+          "mod.sns",
+          "snova.mod",
+          "snova.sns",
+          "snova.toml",
+          "Snovalang.toml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "snova",
+        "scopeName": "source.snova",
+        "path": "./syntaxes/snovalang.tmLanguage.json"
+      },
+      {
+        "language": "snova-manifest",
+        "scopeName": "source.snova.manifest",
+        "path": "./syntaxes/snovalang-manifest.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "snova",
+        "path": "./snippets/snovalang.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "snova.restartServer",
+        "title": "Restart Language Server",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.installServer",
+        "title": "Install or Update Language Server",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.runFile",
+        "title": "Run Current File (snl run)",
+        "category": "Snovalang",
+        "icon": "$(play)"
+      },
+      {
+        "command": "snova.checkFile",
+        "title": "Check Current File (snl check)",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.checkProject",
+        "title": "Check Project (snl check --project)",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.tidyProject",
+        "title": "Tidy Dependencies (snl tidy)",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.getDependencies",
+        "title": "Get Dependencies (snl get)",
+        "category": "Snovalang"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "snova",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The snl subcommand (run, check, tidy, get)."
+          }
         }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .snl || resourceExtname == .sns",
+          "command": "snova.runFile",
+          "group": "navigation"
+        }
+      ]
     },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "test": "npm run compile && node ../scripts/check-server-binary.mjs && node ../scripts/check-lsp-session.mjs && node ../scripts/check-install-snova-lsp.mjs"
-    },
-    "dependencies": {
-        "vscode-languageclient": "^8.1.0"
-    },
-    "devDependencies": {
-        "@types/node": "^18.11.18",
-        "@types/vscode": "^1.75.0",
-        "typescript": "^5.3.3"
+    "configuration": {
+      "type": "object",
+      "title": "Snovalang",
+      "properties": {
+        "snova.lsp.serverPath": {
+          "type": "string",
+          "default": "snova-lsp",
+          "description": "Path to the snova-lsp executable. The default uses the server shipped with the extension (universal Mach-O server/snova-lsp-darwin on macOS, server/snova-lsp on Linux, server/snova-lsp.exe on Windows), then ~/.local/bin/snova-lsp from make install. A custom path is used only when that file exists and its header matches this system."
+        },
+        "snova.lsp.autoInstall": {
+          "type": "boolean",
+          "default": true,
+          "description": "When no snova-lsp binary matches this system, clone https://github.com/snovalang/snova-lsp and run make install into ~/.local/bin."
+        },
+        "snova.compilerPath": {
+          "type": "string",
+          "default": "snl",
+          "description": "Path to the snl toolchain used by the run, check, tidy, and get commands and by code lenses."
+        },
+        "snova.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces communication between VS Code and snova-lsp. When tracing is on, the server is started with --log and writes snova-lsp.log in the temp directory."
+        }
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ../scripts/check-server-binary.mjs && node ../scripts/check-lsp-session.mjs && node ../scripts/check-install-snova-lsp.mjs"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.3.3"
+  }
 }

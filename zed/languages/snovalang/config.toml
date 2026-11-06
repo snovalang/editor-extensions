@@ -1,6 +1,8 @@
 name = "Snovalang"
 grammar = "snovalang"
 path_suffixes = ["snl", "sns"]
+tab_size = 4
+hard_tabs = false
 line_comments = ["// "]
 block_comment = ["/*", "*/"]
 brackets = [

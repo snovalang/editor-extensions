@@ -200,8 +200,9 @@ const installs = [
 for (const source of [zed, installs, extension]) {
   assert(!source.includes("supernovalang/snova-lsp"), "clients use snovalang/snova-lsp");
 }
-assert(zed.includes("https://github.com/snovalang/snova-lsp.git"), "zed clones snovalang/snova-lsp");
-assert(zed.includes("fn server_arguments() -> Vec<String> {\n    Vec::new()\n}"), "zed passes no extra arguments");
+assert(zed.includes('.which("snova-lsp")'), "zed discovers snova-lsp on the worktree PATH");
+assert(!zed.includes("git clone") && !zed.includes("Command::new(\"git\")"), "zed does not clone or build the language server");
+assert(zed.includes("args: Vec::new()"), "zed passes no extra arguments");
 assert(installs.includes("https://github.com/snovalang/snova-lsp.git"), "installer clones snovalang/snova-lsp");
 assert(installs.includes(".local"), "installer uses the make install prefix");
 

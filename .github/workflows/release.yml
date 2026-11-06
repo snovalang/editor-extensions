@@ -1,44 +1,64 @@
-name: Release extensions
+name: Release editor extensions
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-master
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-wasip2
+      - name: Select the next semantic version
+        id: version
+        run: echo "version=$(node scripts/next-release-version.mjs)" >> "$GITHUB_OUTPUT"
+      - name: Set release versions in extension manifests
+        run: node scripts/set-release-version.mjs "${{ steps.version.outputs.version }}"
       - name: Package VS Code extension
         run: ./scripts/package-vscode.sh
       - name: Package Zed extension
         run: ./scripts/package-zed.sh
-      - name: Upload release assets
+      - name: Commit the release version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vscode/package.json vscode/package-lock.json zed/Cargo.toml zed/Cargo.lock zed/extension.toml
+          git commit -m "chore(release): v${VERSION} [skip ci]"
+          git push origin HEAD:master
+          echo "target=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        id: release_commit
+      - name: Create the GitHub release with editor packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TARGET: ${{ steps.release_commit.outputs.target }}
         run: |
-          set -eu
-          tag="${GITHUB_REF_NAME}"
-          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" dist/snovalang.vsix dist/snovalang-zed.tar.gz \
-              --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            gh release create "$tag" dist/snovalang.vsix dist/snovalang-zed.tar.gz \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "$tag" \
-              --notes "Snovalang editor extensions ${tag}. Install instructions are in the repository README."
-          fi
-      - name: Publish to extension registries when credentials exist
+          gh release create "v${VERSION}" \
+            dist/snovalang.vsix \
+            dist/snovalang-zed.tar.gz \
+            --target "$TARGET" \
+            --title "Snovalang v${VERSION}" \
+            --generate-notes
+      - name: Publish to VS Code registries when credentials exist
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
