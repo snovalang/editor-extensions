@@ -155,7 +155,9 @@ try {
   writeFileSync(path.join(payload, "grammars/snovalang.wasm"), "wasm");
   writeFileSync(path.join(payload, "grammars/snovalang_manifest.wasm"), "wasm");
   writeFileSync(path.join(payload, "languages/snovalang/config.toml"), 'name = "Snovalang"\n');
+  writeFileSync(path.join(payload, "languages/snovalang/highlights.scm"), "; test fixture\n");
   writeFileSync(path.join(payload, "languages/snovalang_manifest/config.toml"), 'name = "Snovalang Manifest"\n');
+  writeFileSync(path.join(payload, "languages/snovalang_manifest/highlights.scm"), "; test fixture\n");
   copyFileSync(linuxBin, path.join(payload, "server/snova-lsp"));
   chmodSync(path.join(payload, "server/snova-lsp"), 0o755);
   const archive = path.join(archiveDir, "snovalang-zed.tar.gz");
