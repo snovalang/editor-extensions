@@ -138,8 +138,15 @@ try {
   const archiveDir = mkdtempSync(path.join(tmpdir(), "snova-zed-"));
   const payload = path.join(archiveDir, "snovalang");
   mkdirSync(path.join(payload, "server"), { recursive: true });
+  mkdirSync(path.join(payload, "grammars"), { recursive: true });
+  mkdirSync(path.join(payload, "languages/snovalang"), { recursive: true });
+  mkdirSync(path.join(payload, "languages/snovalang_manifest"), { recursive: true });
   writeFileSync(path.join(payload, "extension.toml"), 'id = "snovalang"\n');
   writeFileSync(path.join(payload, "extension.wasm"), "wasm");
+  writeFileSync(path.join(payload, "grammars/snovalang.wasm"), "wasm");
+  writeFileSync(path.join(payload, "grammars/snovalang_manifest.wasm"), "wasm");
+  writeFileSync(path.join(payload, "languages/snovalang/config.toml"), 'name = "Snovalang"\n');
+  writeFileSync(path.join(payload, "languages/snovalang_manifest/config.toml"), 'name = "Snovalang Manifest"\n');
   copyFileSync(linuxBin, path.join(payload, "server/snova-lsp"));
   chmodSync(path.join(payload, "server/snova-lsp"), 0o755);
   const archive = path.join(archiveDir, "snovalang-zed.tar.gz");
