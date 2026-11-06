@@ -76,18 +76,25 @@ check_archive_file() {
 }
 check_archive_file "$package/extension.toml"
 check_archive_file "$package/extension.wasm"
-check_archive_file "$package/icon_themes/snovalang-icons.json"
-check_archive_file "$package/icons/snovalang-dark.png"
-check_archive_file "$package/icons/snovalang-light.png"
+icon_count=0
 for icon in \
   "$package/icon_themes/snovalang-icons.json" \
   "$package/icons/snovalang-dark.png" \
   "$package/icons/snovalang-light.png"; do
-  if [ ! -s "$icon" ]; then
-    echo "Archive contains an empty icon asset: ${icon#"$tmp"/}" >&2
-    exit 1
+  if [ -e "$icon" ]; then
+    icon_count=$((icon_count + 1))
+    if [ ! -s "$icon" ]; then
+      echo "Archive contains an empty icon asset: ${icon#"$tmp"/}" >&2
+      exit 1
+    fi
   fi
 done
+if [ "$icon_count" -ne 0 ] && [ "$icon_count" -ne 3 ]; then
+  echo "Archive contains an incomplete Snovalang icon theme." >&2
+  exit 1
+elif [ "$icon_count" -eq 0 ]; then
+  echo "This release predates the Snovalang file icon theme; installing its language and LSP support." >&2
+fi
 check_archive_file "$package/grammars/snovalang.wasm"
 check_archive_file "$package/grammars/snovalang_manifest.wasm"
 check_archive_file "$package/languages/snovalang/config.toml"
