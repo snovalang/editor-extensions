@@ -11,6 +11,8 @@
 #   SNOVA_LSP_BUNDLE_DIR   directory of snova-lsp, snova-lsp-darwin, snova-lsp.exe
 #   SNOVA_LSP_CHECKOUT     existing snova-lsp checkout (Makefile + src/lsp_transport.c)
 #   SNOVA_LSP_NO_BUILD     if set, do not clone or compile
+#   SNOVA_LSP_FORCE_LATEST if 1, ignore all local/bundled copies and clone fresh
+#                          default-branch checkouts of snova-lsp and snovac
 #   SNOVA_LSP_ASSUME_HOST  darwin, linux, or win32 (tests)
 #   SNOVA_LSP_ASSUME_ARCH  x64, arm64, ia32, or unknown (tests)
 #   PREFIX                 default $HOME/.local
@@ -197,6 +199,9 @@ is_checkout() {
 build_checkout() {
   checkout=$1
   parent=$(CDPATH= cd -- "$(dirname "$checkout")" && pwd)
+  if [ "${SNOVA_LSP_FORCE_LATEST:-}" = "1" ] && [ -d "$parent/snovac" ]; then
+    rm -rf "$parent/snovac"
+  fi
   if [ ! -f "$parent/snovac/Makefile" ]; then
     echo "Cloning snovac next to $checkout"
     git clone --depth 1 https://github.com/snovalang/snovac.git "$parent/snovac"
@@ -209,7 +214,7 @@ build_checkout() {
   fi
 }
 
-if [ -n "${SNOVA_LSP_BIN:-}" ]; then
+if [ -n "${SNOVA_LSP_BIN:-}" ] && [ "${SNOVA_LSP_FORCE_LATEST:-}" != "1" ]; then
   if header_matches "$SNOVA_LSP_BIN"; then
     install_file "$SNOVA_LSP_BIN"
     exit 0
@@ -220,7 +225,9 @@ fi
 
 repo_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 checkout="${SNOVA_LSP_CHECKOUT:-}"
-if [ -z "$checkout" ]; then
+if [ "${SNOVA_LSP_FORCE_LATEST:-}" = "1" ]; then
+  checkout=""
+elif [ -z "$checkout" ]; then
   for guess in "$repo_root/../snova-lsp" "$repo_root/snova-lsp"; do
     if is_checkout "$guess"; then
       checkout=$guess
@@ -236,20 +243,22 @@ if [ -n "$checkout" ] && is_checkout "$checkout" && [ -z "${SNOVA_LSP_NO_BUILD:-
   echo "Build from $checkout failed. Trying a bundled binary." >&2
 fi
 
-bundled=$(bundle_candidate "${SNOVA_LSP_BUNDLE_DIR:-}" || true)
-if [ -z "$bundled" ]; then
-  bundled=$(bundle_candidate "$repo_root/vscode/server" || true)
-fi
-if [ -n "$bundled" ]; then
-  install_file "$bundled"
-  exit 0
+if [ "${SNOVA_LSP_FORCE_LATEST:-}" != "1" ]; then
+  bundled=$(bundle_candidate "${SNOVA_LSP_BUNDLE_DIR:-}" || true)
+  if [ -z "$bundled" ]; then
+    bundled=$(bundle_candidate "$repo_root/vscode/server" || true)
+  fi
+  if [ -n "$bundled" ]; then
+    install_file "$bundled"
+    exit 0
+  fi
 fi
 
 dest="$bindir/snova-lsp"
 if [ "$host" = win32 ]; then
   dest="$bindir/snova-lsp.exe"
 fi
-if [ -f "$dest" ] && header_matches "$dest"; then
+if [ "${SNOVA_LSP_FORCE_LATEST:-}" != "1" ] && [ -f "$dest" ] && header_matches "$dest"; then
   echo "snova-lsp is already installed at $dest"
   exit 0
 fi
@@ -261,6 +270,9 @@ fi
 
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/snova/src"
 mkdir -p "$cache"
+if [ "${SNOVA_LSP_FORCE_LATEST:-}" = "1" ]; then
+  rm -rf "$cache/snova-lsp"
+fi
 if ! is_checkout "$cache/snova-lsp"; then
   rm -rf "$cache/snova-lsp"
   git clone --depth 1 https://github.com/snovalang/snova-lsp.git "$cache/snova-lsp"

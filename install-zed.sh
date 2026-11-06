@@ -8,6 +8,7 @@ set -eu
 
 REPO="snovalang/editor-extensions"
 URL="${SNOVA_ZED_URL:-https://github.com/${REPO}/releases/latest/download/snovalang-zed.tar.gz}"
+LSP_INSTALLER_URL="${SNOVA_LSP_INSTALLER_URL:-https://raw.githubusercontent.com/${REPO}/master/scripts/install-snova-lsp.sh}"
 
 if ! command -v curl >/dev/null 2>&1; then
   echo "curl is required to download snovalang-zed.tar.gz" >&2
@@ -75,6 +76,18 @@ check_archive_file() {
 }
 check_archive_file "$package/extension.toml"
 check_archive_file "$package/extension.wasm"
+check_archive_file "$package/icon_themes/snovalang-icons.json"
+check_archive_file "$package/icons/snovalang-dark.png"
+check_archive_file "$package/icons/snovalang-light.png"
+for icon in \
+  "$package/icon_themes/snovalang-icons.json" \
+  "$package/icons/snovalang-dark.png" \
+  "$package/icons/snovalang-light.png"; do
+  if [ ! -s "$icon" ]; then
+    echo "Archive contains an empty icon asset: ${icon#"$tmp"/}" >&2
+    exit 1
+  fi
+done
 check_archive_file "$package/grammars/snovalang.wasm"
 check_archive_file "$package/grammars/snovalang_manifest.wasm"
 check_archive_file "$package/languages/snovalang/config.toml"
@@ -146,6 +159,11 @@ copy_server_into_local_bin() {
     *) return 1 ;;
   esac
   if [ -z "${src:-}" ]; then src="$root/server/$srcname"; fi
+  dest="$HOME/.local/bin/$destname"
+  if [ -f "$dest" ] && [ "$(magic_kind "$dest")" = "$expect" ]; then
+    echo "Keeping existing snova-lsp at $dest after the latest-source build was unavailable."
+    return 0
+  fi
   if [ ! -f "$src" ]; then
     if [ "$(uname -s)" = Darwin ]; then
       echo "No compatible bundled macOS language server was found; Zed will use ~/.local/bin/snova-lsp if available or install one when a Snovalang file is opened." >&2
@@ -168,7 +186,22 @@ copy_server_into_local_bin() {
   echo "Installed snova-lsp to $HOME/.local/bin/$destname"
 }
 
-copy_server_into_local_bin "$installed" || true
+latest_lsp=0
+if [ "${SNOVA_ZED_SKIP_LSP_UPDATE:-}" != "1" ]; then
+  echo "Fetching the snova-lsp installer from $LSP_INSTALLER_URL"
+  if curl -fL --retry 2 -o "$tmp/install-snova-lsp.sh" "$LSP_INSTALLER_URL"; then
+    if SNOVA_LSP_FORCE_LATEST=1 sh "$tmp/install-snova-lsp.sh"; then
+      latest_lsp=1
+    else
+      echo "Could not build the latest snova-lsp; keeping a host-compatible installed or bundled server." >&2
+    fi
+  else
+    echo "Could not download the latest snova-lsp installer; keeping a host-compatible installed or bundled server." >&2
+  fi
+fi
+if [ "$latest_lsp" != "1" ]; then
+  copy_server_into_local_bin "$installed" || true
+fi
 
 echo "Installed Snovalang to $installed"
 echo "Restart Zed, or run \"zed: reload extensions\" from the command palette."

@@ -79,5 +79,11 @@ printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp-darwin' || {
   echo "snovalang.vsix is missing extension/server/snova-lsp-darwin" >&2
   exit 1
 }
+for icon in snovalang-light.png snovalang-dark.png; do
+  printf '%s\n' "$listing" | grep -qx "extension/icons/$icon" || {
+    echo "snovalang.vsix is missing extension/icons/$icon" >&2
+    exit 1
+  }
+done
 
 echo "Built $ROOT/dist/snovalang.vsix"

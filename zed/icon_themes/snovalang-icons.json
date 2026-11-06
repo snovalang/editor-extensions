@@ -1,0 +1,31 @@
+{
+  "$schema": "https://zed.dev/schema/icon_themes/v0.3.0.json",
+  "name": "Snovalang Icons",
+  "author": "Aggitech Team",
+  "themes": [
+    {
+      "name": "Snovalang Icons",
+      "appearance": "dark",
+      "file_suffixes": {
+        "snl": "snovalang"
+      },
+      "file_icons": {
+        "snovalang": {
+          "path": "./icons/snovalang-dark.png"
+        }
+      }
+    },
+    {
+      "name": "Snovalang Icons Light",
+      "appearance": "light",
+      "file_suffixes": {
+        "snl": "snovalang"
+      },
+      "file_icons": {
+        "snovalang": {
+          "path": "./icons/snovalang-light.png"
+        }
+      }
+    }
+  ]
+}

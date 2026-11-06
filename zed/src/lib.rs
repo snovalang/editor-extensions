@@ -337,9 +337,10 @@ fn usable_binary(path: &Path, os: Os, arch: Architecture) -> Option<String> {
 
 fn candidate_paths(os: Os, worktree: &Worktree) -> Vec<PathBuf> {
     let mut paths = Vec::new();
+    let mut bundled = Vec::new();
     for name in bundled_names(os) {
-        paths.push(PathBuf::from("server").join(name));
-        paths.push(PathBuf::from("..").join("vscode").join("server").join(name));
+        bundled.push(PathBuf::from("server").join(name));
+        bundled.push(PathBuf::from("..").join("vscode").join("server").join(name));
     }
     let installed = installed_name(os);
     let alias = alias_name(os);
@@ -364,6 +365,7 @@ fn candidate_paths(os: Os, worktree: &Worktree) -> Vec<PathBuf> {
             paths.push(local.join("Zed").join("tools").join("bin").join(installed));
         }
     }
+    paths.extend(bundled);
     let root = absolute_dir(&PathBuf::from(worktree.root_path()));
     let mut ancestor = root;
     for _ in 0..6 {
