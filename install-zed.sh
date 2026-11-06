@@ -75,6 +75,18 @@ check_archive_file() {
 }
 check_archive_file "$package/extension.toml"
 check_archive_file "$package/extension.wasm"
+check_archive_file "$package/icon_themes/snovalang-icons.json"
+check_archive_file "$package/icons/snovalang-dark.png"
+check_archive_file "$package/icons/snovalang-light.png"
+for icon in \
+  "$package/icon_themes/snovalang-icons.json" \
+  "$package/icons/snovalang-dark.png" \
+  "$package/icons/snovalang-light.png"; do
+  if [ ! -s "$icon" ]; then
+    echo "Archive contains an empty icon asset: ${icon#"$tmp"/}" >&2
+    exit 1
+  fi
+done
 check_archive_file "$package/grammars/snovalang.wasm"
 check_archive_file "$package/grammars/snovalang_manifest.wasm"
 check_archive_file "$package/languages/snovalang/config.toml"

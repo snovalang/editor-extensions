@@ -22,6 +22,7 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 
 ## Use
 
+- The extension supplies the Snovalang symbol as the language icon for `.snl` and `.sns` files when the active file icon theme does not provide its own.
 - Opening a `.snl` or `.sns` file starts `snova-lsp` in the background. One process serves the window. The editor stays responsive while it initializes.
 - On macOS the extension starts the universal Mach-O `server/snova-lsp-darwin` and does not launch the Linux ELF or the Windows executable. Linux starts `server/snova-lsp`. Windows starts `server/snova-lsp.exe`.
 - A `snova.lsp.serverPath` value other than `snova-lsp` is used only when that file exists and its executable header matches this system.

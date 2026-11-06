@@ -108,6 +108,9 @@ try {
   const code = path.join(binDir, "code");
   writeFileSync(code, `#!/bin/sh\nprintf '%s\\n' "$@" > "${codeLog}"\nexit 0\n`);
   chmodSync(code, 0o755);
+  const uname = path.join(binDir, "uname");
+  writeFileSync(uname, '#!/bin/sh\ncase "$1" in -s) echo Linux ;; -m) echo x86_64 ;; *) exit 1 ;; esac\n');
+  chmodSync(uname, 0o755);
 
   const vsixDir = mkdtempSync(path.join(tmpdir(), "snova-vsix-"));
   const vsix = path.join(vsixDir, "snovalang.vsix");
@@ -139,10 +142,15 @@ try {
   const payload = path.join(archiveDir, "snovalang");
   mkdirSync(path.join(payload, "server"), { recursive: true });
   mkdirSync(path.join(payload, "grammars"), { recursive: true });
+  mkdirSync(path.join(payload, "icon_themes"), { recursive: true });
+  mkdirSync(path.join(payload, "icons"), { recursive: true });
   mkdirSync(path.join(payload, "languages/snovalang"), { recursive: true });
   mkdirSync(path.join(payload, "languages/snovalang_manifest"), { recursive: true });
   writeFileSync(path.join(payload, "extension.toml"), 'id = "snovalang"\n');
   writeFileSync(path.join(payload, "extension.wasm"), "wasm");
+  writeFileSync(path.join(payload, "icon_themes/snovalang-icons.json"), "{}");
+  writeFileSync(path.join(payload, "icons/snovalang-dark.png"), "png");
+  writeFileSync(path.join(payload, "icons/snovalang-light.png"), "png");
   writeFileSync(path.join(payload, "grammars/snovalang.wasm"), "wasm");
   writeFileSync(path.join(payload, "grammars/snovalang_manifest.wasm"), "wasm");
   writeFileSync(path.join(payload, "languages/snovalang/config.toml"), 'name = "Snovalang"\n');
@@ -156,11 +164,15 @@ try {
   runScript("install-zed.sh", {
     HOME: zedHome,
     XDG_DATA_HOME: path.join(zedHome, "data"),
+    PATH: `${binDir}:${process.env.PATH}`,
     SNOVA_ZED_URL: `file://${archive}`,
   });
   const installedExt = path.join(zedHome, "data/zed/extensions/installed/snovalang");
   assert(existsSync(path.join(installedExt, "extension.toml")), "install-zed.sh installs the extension");
   assert(existsSync(path.join(installedExt, "server/snova-lsp")), "install-zed.sh keeps the server in the extension");
+  assert(existsSync(path.join(installedExt, "icon_themes/snovalang-icons.json")), "install-zed.sh installs the icon theme");
+  assert(existsSync(path.join(installedExt, "icons/snovalang-dark.png")), "install-zed.sh installs the dark icon");
+  assert(existsSync(path.join(installedExt, "icons/snovalang-light.png")), "install-zed.sh installs the light icon");
   assert(existsSync(path.join(zedHome, ".local/bin/snova-lsp")), "install-zed.sh copies snova-lsp to ~/.local/bin");
   rmSync(archiveDir, { recursive: true, force: true });
 } finally {

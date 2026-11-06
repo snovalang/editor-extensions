@@ -1,7 +1,7 @@
 #!/bin/sh
 # Build dist/snovalang-zed.tar.gz, the archive install-zed.sh extracts into
 # Zed's installed-extensions directory. Layout matches a gallery install:
-# extension.toml, extension.wasm, grammars/*.wasm, languages/.
+# extension.toml, extension.wasm, grammars/*.wasm, icon_themes/, icons/, languages/.
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
@@ -75,7 +75,7 @@ if ! grep -a -q "zed:api-version" "$wasm"; then
 fi
 
 rm -rf "$PKG"
-mkdir -p "$PKG/grammars" "$PKG/languages" "$PKG/server"
+mkdir -p "$PKG/grammars" "$PKG/languages" "$PKG/server" "$PKG/icon_themes" "$PKG/icons"
 for bin in snova-lsp snova-lsp.exe snova-lsp-darwin; do
   if [ ! -f "$ROOT/vscode/server/$bin" ]; then
     echo "snovalang-zed.tar.gz needs vscode/server/$bin" >&2
@@ -117,8 +117,20 @@ cp "$ZED/extension.toml" "$PKG/extension.toml"
 cp "$wasm" "$PKG/extension.wasm"
 cp -R "$ZED/languages/snovalang" "$PKG/languages/snovalang"
 cp -R "$ZED/languages/snovalang_manifest" "$PKG/languages/snovalang_manifest"
+cp "$ZED/icon_themes/snovalang-icons.json" "$PKG/icon_themes/snovalang-icons.json"
+cp "$ZED/icons/snovalang-dark.png" "$PKG/icons/snovalang-dark.png"
+cp "$ZED/icons/snovalang-light.png" "$PKG/icons/snovalang-light.png"
 
 tarball="$DIST/snovalang-zed.tar.gz"
 tar -czf "$tarball" -C "$DIST" snovalang
-echo "Built $tarball"
 tar -tzf "$tarball"
+for required in \
+  snovalang/icon_themes/snovalang-icons.json \
+  snovalang/icons/snovalang-dark.png \
+  snovalang/icons/snovalang-light.png; do
+  tar -tzf "$tarball" | grep -qx "$required" || {
+    echo "snovalang-zed.tar.gz is missing $required" >&2
+    exit 1
+  }
+done
+echo "Built $tarball"

@@ -53,6 +53,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 ### VS Code ([`vscode/`](vscode/))
 
 - TextMate highlighting for `.snl` sources and `.sns` scripts
+- Snovalang symbol as the language icon for `.snl` and `.sns` files when the active VS Code file icon theme does not provide its own
 - Manifest highlighting for `mod.sns` and `snova.sns`
 - Bundled language server: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`
 - When no compatible binary is present, `snova.lsp.autoInstall` (default on) runs `make install` from [snova-lsp](https://github.com/snovalang/snova-lsp) into `~/.local/bin`
@@ -69,6 +70,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 
 - Tree-sitter highlighting, brackets, indents, and outline
 - One `snova-lsp` process per worktree, using the binary shipped in `server/` or `~/.local/bin/snova-lsp`
+- A `Snovalang Icons` theme inside the language dev extension provides the `.snl` file icon. Install `zed/` with **zed: install dev extension**, then select **Snovalang Icons** in the icon theme selector.
 
 ## Developing
 
@@ -83,7 +85,7 @@ Pushing a tag `vX.Y.Z` runs the release workflow, which attaches those two files
 
 VS Code development: `cd vscode && npm ci && npm run compile`.
 
-Zed development: in Zed, run **zed: install dev extension** and select the `zed/` directory. Grammar revisions are the `rev` fields in `zed/extension.toml`. On Windows, if the host linker reports `msvcrt.lib` missing, build with the GNU toolchain (`zed/build.ps1`).
+Zed development: in Zed, run **zed: install dev extension** and select the `zed/` directory, then choose **Snovalang Icons** in the icon theme selector. Grammar revisions are the `rev` fields in `zed/extension.toml`. On Windows, if the host linker reports `msvcrt.lib` missing, build with the GNU toolchain (`zed/build.ps1`).
 
 `install_ide.sh` and `install_ide.ps1` are an optional checklist. They call the same release installers.
 

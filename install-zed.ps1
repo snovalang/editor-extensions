@@ -18,6 +18,9 @@ try {
     $required = @(
         "extension.toml",
         "extension.wasm",
+        "icon_themes\snovalang-icons.json",
+        "icons\snovalang-dark.png",
+        "icons\snovalang-light.png",
         "grammars\snovalang.wasm",
         "grammars\snovalang_manifest.wasm",
         "languages\snovalang\config.toml",
@@ -31,6 +34,11 @@ try {
     }
     if ((Get-Item -LiteralPath (Join-Path $unpacked "extension.wasm")).Length -eq 0) {
         throw "Archive contains an empty extension.wasm"
+    }
+    foreach ($relativePath in @("icon_themes\snovalang-icons.json", "icons\snovalang-dark.png", "icons\snovalang-light.png")) {
+        if ((Get-Item -LiteralPath (Join-Path $unpacked $relativePath)).Length -eq 0) {
+            throw "Archive contains an empty icon asset: snovalang/$relativePath"
+        }
     }
     New-Item -ItemType Directory -Force -Path (Join-Path $extRoot "installed") | Out-Null
     $backup = "$installed.backup.$([guid]::NewGuid().ToString('n'))"

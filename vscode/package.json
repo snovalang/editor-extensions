@@ -30,6 +30,10 @@
                 "id": "snova",
                 "aliases": ["Snovalang", "snova"],
                 "extensions": [".snl", ".sns"],
+                "icon": {
+                    "light": "./icons/snovalang-light.png",
+                    "dark": "./icons/snovalang-dark.png"
+                },
                 "configuration": "./language-configuration.json"
             },
             {

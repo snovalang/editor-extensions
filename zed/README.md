@@ -26,6 +26,11 @@ The extension starts `snova-lsp` when a Snovalang file is opened. It uses the bi
 
 - Highlights, brackets, indents, and outline queries
 - Language server command for `snova-lsp` over stdio
+- `.snl` file icon from the Snovalang language dev extension
+
+## Development icon
+
+Run **zed: install dev extension** and select `zed/`. Then run **icon theme selector: toggle** and choose **Snovalang Icons**. The theme maps `.snl` files to the high-contrast Snovalang symbol.
 
 ## Developing
 
