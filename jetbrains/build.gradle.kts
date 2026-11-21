@@ -17,7 +17,7 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
-        // 2025.1 bundles the Kotlin 2.1 standard library.
+        // 2025.2 bundles a Kotlin 2.1+ standard library.
         apiVersion.set(KotlinVersion.KOTLIN_2_1)
         languageVersion.set(KotlinVersion.KOTLIN_2_1)
     }
