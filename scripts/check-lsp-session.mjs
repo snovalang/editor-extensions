@@ -169,7 +169,10 @@ function assertSession(messages, label) {
   assert(caps.definitionProvider === true, `${label} definition`);
   assert(caps.referencesProvider === true, `${label} references`);
   assert(caps.documentSymbolProvider === true, `${label} symbols`);
-  assert(caps.signatureHelpProvider === true, `${label} signature`);
+  assert(
+    caps.signatureHelpProvider && Array.isArray(caps.signatureHelpProvider.triggerCharacters),
+    `${label} signature options`,
+  );
   assert(caps.implementationProvider === true, `${label} implementation`);
   assert(caps.codeActionProvider === true, `${label} code action`);
   assert(caps.completionProvider.resolveProvider === false, `${label} completion resolve`);

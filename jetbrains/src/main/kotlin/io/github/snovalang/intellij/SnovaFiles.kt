@@ -1,6 +1,5 @@
 package io.github.snovalang.intellij
 
-import com.intellij.ide.plugins.PluginManager
 import com.intellij.openapi.vfs.VirtualFile
 import java.nio.file.Files
 import java.nio.file.Path
@@ -20,8 +19,14 @@ object SnovaFiles {
     fun isSnovalang(file: VirtualFile): Boolean =
         file.isInLocalFileSystem && !file.isDirectory && (isSource(file) || isManifest(file))
 
-    /** Directory the plugin was unpacked into: holds lib/, server/ and textmate/. */
-    fun pluginDir(): Path? = PluginManager.getPluginByClass(SnovaFiles::class.java)?.pluginPath
+    /** Locate the unpacked plugin root from this class's own code source. */
+    fun pluginDir(): Path? = runCatching {
+        val location = Path.of(SnovaFiles::class.java.protectionDomain.codeSource.location.toURI())
+        val start = if (Files.isRegularFile(location)) location.parent else location
+        generateSequence(start) { it.parent }.firstOrNull {
+            Files.isDirectory(it.resolve("server")) && Files.isDirectory(it.resolve("lib"))
+        }
+    }.getOrNull()
 
     /** Nearest ancestor directory of [file] that holds a manifest, like the VS Code client. */
     fun findProject(file: Path): Path? {

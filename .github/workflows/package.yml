@@ -14,6 +14,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-wasip2
+      - name: Build Linux LSP
+        run: ./scripts/build-linux-lsp.sh
       - name: Package VS Code extension
         run: ./scripts/package-vscode.sh
       - uses: actions/setup-java@v4

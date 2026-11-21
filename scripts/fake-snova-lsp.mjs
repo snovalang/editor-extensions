@@ -10,7 +10,7 @@ if (log) log.write("snova-lsp started\n");
 const CAPABILITIES = {
   textDocumentSync: 1,
   hoverProvider: true,
-  signatureHelpProvider: true,
+  signatureHelpProvider: { triggerCharacters: ["(", ","] },
   definitionProvider: true,
   referencesProvider: true,
   implementationProvider: true,
