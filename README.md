@@ -1,10 +1,29 @@
 # Snovalang Editor Extensions
 
-Syntax highlighting, snippets, and language-server support for Snovalang in VS Code and Zed.
+Syntax highlighting, snippets, and language-server support for Snovalang in VS Code, JetBrains IDEs, and Zed.
 
 Diagnostics, hover, completion, signature help, and navigation come from [snova-lsp](https://github.com/snovalang/snova-lsp). Each editor starts one server process per workspace, in the background, when a Snovalang file is opened. Run and check actions still call the installed compiler command, `snl`.
 
-The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. If no shipped binary matches, VS Code can clone `https://github.com/snovalang/snova-lsp` and run `make install`. Zed requires a separately installed `snova-lsp` on the worktree's `PATH`, as described below. On macOS VS Code starts the universal Mach-O binary and does not launch the Linux or Windows executable.
+The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. If no shipped binary matches, VS Code can clone `https://github.com/snovalang/snova-lsp` and run `make install`. The JetBrains plugin ships the same three binaries. Zed requires a separately installed `snova-lsp` on the worktree's `PATH`, as described below. On macOS VS Code starts the universal Mach-O binary and does not launch the Linux or Windows executable.
+
+## Downloads
+
+Every release is listed here; the release workflow adds a row for each new version. Click an editor to download its package.
+
+<!-- downloads:start -->
+**Latest** — [**VS Code**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) · [**Zed**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) · [**JetBrains**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip)
+
+| Version | Date | VS Code | Zed | JetBrains |
+| --- | --- | --- | --- | --- |
+| [v0.3.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.3.0) | 2026-10-05 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang-zed.tar.gz) | — |
+| [v0.2.1](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.1) | 2026-10-04 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang-zed.tar.gz) | — |
+| [v0.2.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang-zed.tar.gz) | — |
+| [v0.1.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.1.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang-zed.tar.gz) | — |
+
+Older versions: [all releases](https://github.com/snovalang/editor-extensions/releases).
+<!-- downloads:end -->
+
+The JetBrains plugin ships from the first release after v0.3.0.
 
 ## VS Code
 
@@ -29,6 +48,28 @@ code --install-extension snovalang.vsix
 From the editor, download [snovalang.vsix](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) and run **Extensions: Install from VSIX...**.
 
 The release workflow publishes that same VSIX to the Visual Studio Marketplace and Open VSX when the `VSCE_PAT` and `OVSX_PAT` repository secrets are set. The VSIX command above is the install path that works without those secrets.
+
+## JetBrains IDEs
+
+IntelliJ IDEA, PyCharm, WebStorm, GoLand, CLion, Rider, RustRover, PhpStorm, RubyMine, DataGrip and DataSpell, version 2025.1 or newer. The plugin uses the IDE's built-in LSP client, which open-source IntelliJ IDEA builds and Android Studio do not include. The plugin declares no upper version bound, so new IDE releases load it without a plugin update.
+
+Linux and macOS:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-jetbrains.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-jetbrains.ps1 | iex
+```
+
+Both scripts download [snovalang-jetbrains.zip](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip) and copy the plugin into every JetBrains IDE 2025.1 or newer that has a configuration directory for the current user. Restart the IDE afterwards.
+
+From the IDE, download the zip and open **Settings | Plugins | ⚙ | Install Plugin from Disk...**.
+
+The release workflow publishes the plugin to the JetBrains Marketplace when the `JETBRAINS_MARKETPLACE_TOKEN` repository secret is set.
 
 ## Zed
 
@@ -66,6 +107,14 @@ After the extension is accepted into the [Zed extension repository](https://gith
 - **Snovalang: Tidy Dependencies** runs `snl tidy`
 - **Snovalang: Get Dependencies** runs `snl get`
 
+### JetBrains ([`jetbrains/`](jetbrains/))
+
+- Highlighting, brackets, comment toggling and snippets from the VS Code TextMate grammars, language configuration and snippets
+- Snovalang file icons
+- Bundled `snova-lsp` (the same Linux, Windows and universal Mach-O binaries as the VSIX), then `~/.local/bin/snova-lsp`, then `PATH`. **Settings | Languages & Frameworks | Snovalang** sets a custom server path, the `snl` path and server logging
+- One `snova-lsp` per project, through the IDE's LSP client
+- **Tools | Snovalang** runs `snl run`, `snl check`, `snl check --project`, `snl tidy` and `snl get` in the Run tool window, and restarts the language server
+
 ### Zed ([`zed/`](zed/))
 
 - Tree-sitter highlighting, brackets, indents, and outline
@@ -79,11 +128,14 @@ Clone this repository to change the extensions.
 ```sh
 ./scripts/package-vscode.sh   # writes dist/snovalang.vsix
 ./scripts/package-zed.sh      # writes dist/snovalang-zed.tar.gz (wasm32-wasip2 component + Tree-sitter grammars)
+./scripts/package-jetbrains.sh # writes dist/snovalang-jetbrains.zip (needs JDK 21)
 ```
 
-Every push to `master` creates a GitHub release with `snovalang.vsix` and `snovalang-zed.tar.gz`. Release versions follow Conventional Commits: `feat:` bumps minor, a breaking change (`!` or `BREAKING CHANGE:`) bumps major, and other commits bump patch. GitHub Copilot is instructed to use these commit prefixes in [.github/copilot-instructions.md](.github/copilot-instructions.md). The release workflow updates the VS Code and Zed package manifests to the selected version before building.
+Every push to `master` creates a GitHub release with `snovalang.vsix`, `snovalang-zed.tar.gz` and `snovalang-jetbrains.zip`, and adds the version to the [Downloads](#downloads) table. Release versions follow Conventional Commits: `feat:` bumps minor, a breaking change (`!` or `BREAKING CHANGE:`) bumps major, and other commits bump patch. GitHub Copilot is instructed to use these commit prefixes in [.github/copilot-instructions.md](.github/copilot-instructions.md). The release workflow updates the VS Code, Zed and JetBrains package manifests to the selected version before building.
 
 VS Code development: `cd vscode && npm ci && npm run compile`.
+
+JetBrains development: `cd jetbrains && ./gradlew runIde` starts an IDE sandbox with the plugin; `./gradlew verifyPlugin` checks it against current IDE releases.
 
 Zed development: in Zed, run **zed: install dev extension** and select the `zed/` directory. Grammar revisions are the `rev` fields in `zed/extension.toml`. On Windows, if the host linker reports `msvcrt.lib` missing, build with the GNU toolchain (`zed/build.ps1`).
 

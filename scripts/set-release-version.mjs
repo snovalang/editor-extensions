@@ -37,4 +37,8 @@ fs.writeFileSync(cargoLock,
     `$1${version}$2`,
   ));
 
+const gradleProperties = path.join(root, "jetbrains/gradle.properties");
+fs.writeFileSync(gradleProperties,
+  fs.readFileSync(gradleProperties, "utf8").replace(/^pluginVersion=.*$/m, `pluginVersion=${version}`));
+
 console.log(version);

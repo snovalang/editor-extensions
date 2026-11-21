@@ -7,6 +7,7 @@ OPTIONS=(
   "default" "Default Snovalang LSP" off
   "vscode" "Visual Studio Code" off
   "zed" "Zed" off
+  "jetbrains" "JetBrains IDEs" off
 )
 
 TMPFILE=$(mktemp)
@@ -14,7 +15,7 @@ TMPFILE=$(mktemp)
 dialog --clear \
   --title "Choose a setup for your IDE" \
   --checklist "\n-- Toggle options using Space --\n-- Submit on Enter --" \
-  15 50 3 \
+  16 50 4 \
   "${OPTIONS[@]}" 2> "$TMPFILE"
 
 SELECTION=$(cat "$TMPFILE")
@@ -39,6 +40,7 @@ echo "You selected:"
 print_status "default" "Default Snovalang LSP"
 print_status "vscode" "Visual Studio Code"
 print_status "zed" "Zed"
+print_status "jetbrains" "JetBrains IDEs"
 
 if [[ $SELECTION == *"default"* ]]; then
   echo "Installing Default Snovalang LSP..."
@@ -58,6 +60,10 @@ fi
 if [[ $SELECTION == *"zed"* ]]; then
   echo "Installing Snovalang extension for Zed..."
   "$SCRIPT_DIR/install-zed.sh"
+fi
+if [[ $SELECTION == *"jetbrains"* ]]; then
+  echo "Installing Snovalang plugin for JetBrains IDEs..."
+  "$SCRIPT_DIR/install-jetbrains.sh"
 fi
 
 exit 0
