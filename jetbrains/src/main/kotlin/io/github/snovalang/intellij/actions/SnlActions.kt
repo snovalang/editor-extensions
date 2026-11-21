@@ -110,6 +110,27 @@ class CheckProjectAction : SnlAction() {
         ?: fail("No mod.sns found for this file.")
 }
 
+class BuildFileAction : SnlAction() {
+    override val requiresFile = true
+    override fun command(target: Target) = target.file
+        ?.let { Result.success("build ${it.fileName}" to listOf("build", it.toString())) }
+        ?: fail("Open a Snovalang file to build.")
+}
+
+class BuildProjectAction : SnlAction() {
+    override val requiresFile = false
+    override fun command(target: Target) = target.project
+        ?.let { Result.success("build project" to listOf("build", "--project", it.toString())) }
+        ?: fail("No Snovalang project found.")
+}
+
+class RunProjectAction : SnlAction() {
+    override val requiresFile = false
+    override fun command(target: Target) = target.project
+        ?.let { Result.success("run project" to listOf("run", "--project", it.toString())) }
+        ?: fail("No Snovalang project found.")
+}
+
 class TidyAction : SnlAction() {
     override val requiresFile = false
     override fun command(target: Target) = target.project
