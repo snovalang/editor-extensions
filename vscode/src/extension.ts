@@ -231,6 +231,14 @@ export function activate(context: ExtensionContext): void {
   const log = window.createOutputChannel("Snovalang");
   context.subscriptions.push(log);
 
+  const cursorAnalysisTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  context.subscriptions.push({
+    dispose: () => {
+      for (const timer of cursorAnalysisTimers.values()) clearTimeout(timer);
+      cursorAnalysisTimers.clear();
+    },
+  });
+
   const register = <T extends unknown[]>(id: string, fn: (...args: T) => unknown): void => {
     context.subscriptions.push(commands.registerCommand(id, (...args: unknown[]) => fn(...args as T)));
   };
@@ -336,6 +344,26 @@ export function activate(context: ExtensionContext): void {
   });
 
   context.subscriptions.push(
+    window.onDidChangeTextEditorSelection((event) => {
+      const document = event.textEditor.document;
+      if (document.languageId !== "snova" && document.languageId !== "snova-manifest") return;
+      if (!client) return;
+
+      const uri = document.uri.toString();
+      const previousTimer = cursorAnalysisTimers.get(uri);
+      if (previousTimer) clearTimeout(previousTimer);
+      cursorAnalysisTimers.set(
+        uri,
+        setTimeout(() => {
+          cursorAnalysisTimers.delete(uri);
+          if (!client || document.isClosed) return;
+          client.sendNotification("textDocument/didChange", {
+            textDocument: { uri, version: document.version },
+            contentChanges: [{ text: document.getText() }],
+          });
+        }, 250),
+      );
+    }),
     workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration("snova.lsp") || event.affectsConfiguration("snova.trace")) {
         window
