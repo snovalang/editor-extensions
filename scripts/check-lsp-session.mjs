@@ -217,7 +217,11 @@ for (const source of [zed, installs, extension]) {
 }
 assert(zed.includes('.which("snova-lsp")'), "zed discovers snova-lsp on the worktree PATH");
 assert(!zed.includes("git clone") && !zed.includes("Command::new(\"git\")"), "zed does not clone or build the language server");
-assert(zed.includes("args: Vec::new()"), "zed passes no extra arguments");
+assert(zed.includes("args: vec![\"--log\".to_string()"), "zed enables server protocol logs");
+assert(zed.includes("latest_github_release") && zed.includes("download_file"), "zed installs the latest release LSP");
+const zedManifest = readFileSync(path.join(root, "zed/extension.toml"), "utf8");
+assert(zedManifest.includes('"Snovalang" = "snova"'), "zed maps source files to the server language ID");
+assert(zedManifest.includes('"Snovalang Manifest" = "snova-manifest"'), "zed maps manifest files to the server language ID");
 assert(installs.includes("https://github.com/snovalang/snova-lsp.git"), "installer clones snovalang/snova-lsp");
 assert(installs.includes(".local"), "installer uses the make install prefix");
 
