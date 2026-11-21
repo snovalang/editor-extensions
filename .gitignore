@@ -12,3 +12,6 @@ target/
 *.vsix
 zed/extension.wasm
 grammars/
+.gradle/
+.intellijPlatform/
+.kotlin/

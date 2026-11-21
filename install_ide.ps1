@@ -8,6 +8,7 @@ $options = @(
     @{ Id = 1; Tag = "default"; Label = "Default Snovalang LSP" }
     @{ Id = 2; Tag = "vscode";  Label = "Visual Studio Code" }
     @{ Id = 3; Tag = "zed";     Label = "Zed" }
+    @{ Id = 4; Tag = "jetbrains"; Label = "JetBrains IDEs" }
 )
 
 function Show-Menu {
@@ -53,6 +54,7 @@ Write-Host "You selected:`n"
 Print-Status "default" "Default Snovalang LSP"
 Print-Status "vscode"  "Visual Studio Code"
 Print-Status "zed"     "Zed"
+Print-Status "jetbrains" "JetBrains IDEs"
 
 # Placeholder for actual installation logic
 if ($selectedTags -contains "default") {
@@ -75,6 +77,11 @@ if ($selectedTags -contains "vscode") {
 if ($selectedTags -contains "zed") {
     Write-Host "Installing Snovalang extension for Zed..." -ForegroundColor Cyan
     & "$PSScriptRoot\install-zed.ps1"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+if ($selectedTags -contains "jetbrains") {
+    Write-Host "Installing Snovalang plugin for JetBrains IDEs..." -ForegroundColor Cyan
+    & "$PSScriptRoot\install-jetbrains.ps1"
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 

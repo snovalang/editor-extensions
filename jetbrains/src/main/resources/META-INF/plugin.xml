@@ -1,0 +1,63 @@
+<idea-plugin>
+    <id>io.github.snovalang</id>
+    <name>Snovalang</name>
+    <vendor url="https://github.com/snovalang">Snovalang</vendor>
+
+    <description><![CDATA[
+    <p>Snovalang support for JetBrains IDEs.</p>
+    <ul>
+      <li>Highlighting, bracket matching, comment toggling and snippets for <code>.snl</code> sources,
+          <code>.sns</code> scripts and <code>mod.sns</code> manifests, from the same TextMate grammars
+          as the VS Code extension</li>
+      <li>Diagnostics, completion, hover, navigation and the other features
+          <a href="https://github.com/snovalang/snova-lsp">snova-lsp</a> advertises, through the IDE's
+          built-in Language Server Protocol client. The plugin ships snova-lsp for Linux, Windows and macOS.</li>
+      <li><b>Tools | Snovalang</b> actions that run <code>snl run</code>, <code>snl check</code>,
+          <code>snl tidy</code> and <code>snl get</code> in the Run tool window</li>
+    </ul>
+    ]]></description>
+
+    <!-- The LSP API is part of every commercial JetBrains IDE and of unified PyCharm since 2025.1.
+         Open-source IntelliJ IDEA builds and Android Studio do not include it. -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lsp</depends>
+    <depends>org.jetbrains.plugins.textmate</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider
+                implementation="io.github.snovalang.intellij.lsp.SnovaLspServerSupportProvider"/>
+        <fileIconProvider implementation="io.github.snovalang.intellij.SnovaFileIconProvider"/>
+        <applicationConfigurable
+                parentId="language"
+                id="io.github.snovalang.settings"
+                displayName="Snovalang"
+                instance="io.github.snovalang.intellij.settings.SnovaConfigurable"/>
+        <notificationGroup id="Snovalang" displayType="BALLOON"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.plugins.textmate">
+        <bundleProvider implementation="io.github.snovalang.intellij.SnovaTextMateBundleProvider"/>
+    </extensions>
+
+    <actions>
+        <group id="Snovalang.Tools" text="Snovalang" popup="true" icon="/icons/snovalang.svg">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="Snovalang.RunFile" class="io.github.snovalang.intellij.actions.RunFileAction"
+                    text="Run Current File (snl run)" icon="AllIcons.Actions.Execute"/>
+            <action id="Snovalang.CheckFile" class="io.github.snovalang.intellij.actions.CheckFileAction"
+                    text="Check Current File (snl check)"/>
+            <action id="Snovalang.CheckProject" class="io.github.snovalang.intellij.actions.CheckProjectAction"
+                    text="Check Project (snl check --project)"/>
+            <action id="Snovalang.Tidy" class="io.github.snovalang.intellij.actions.TidyAction"
+                    text="Tidy Dependencies (snl tidy)"/>
+            <action id="Snovalang.Get" class="io.github.snovalang.intellij.actions.GetDependenciesAction"
+                    text="Get Dependencies (snl get)"/>
+            <separator/>
+            <action id="Snovalang.RestartServer" class="io.github.snovalang.intellij.actions.RestartServerAction"
+                    text="Restart Language Server"/>
+        </group>
+        <reference ref="Snovalang.RunFile">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </reference>
+    </actions>
+</idea-plugin>

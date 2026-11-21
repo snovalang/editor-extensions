@@ -16,11 +16,22 @@ jobs:
           targets: wasm32-wasip2
       - name: Package VS Code extension
         run: ./scripts/package-vscode.sh
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
       - name: Package Zed extension
         run: ./scripts/package-zed.sh
+      - name: Package JetBrains plugin
+        run: ./scripts/package-jetbrains.sh
+      - name: Verify JetBrains plugin against current IDE releases
+        working-directory: jetbrains
+        run: ./gradlew --no-daemon --console=plain verifyPlugin
       - uses: actions/upload-artifact@v4
         with:
           name: editor-extensions
           path: |
             dist/snovalang.vsix
             dist/snovalang-zed.tar.gz
+            dist/snovalang-jetbrains.zip
