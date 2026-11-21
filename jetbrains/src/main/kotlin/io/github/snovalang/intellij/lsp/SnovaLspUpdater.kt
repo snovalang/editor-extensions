@@ -2,14 +2,12 @@ package io.github.snovalang.intellij.lsp
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.ide.BrowserUtil
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.startup.ProjectActivity
@@ -57,9 +55,16 @@ class SnovaLspUpdater : ProjectActivity {
     private fun latestPluginReleaseTag(): String? = runCatching {
         val release = getJson(RELEASE_API)
         val tag = release.get("tag_name")?.takeIf { it.isJsonPrimitive }?.asString ?: return null
-        val current = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version ?: return null
+        val current = currentPluginVersion() ?: return null
         if (isNewerVersion(tag, current)) tag else null
     }.onFailure { LOG.warn("Could not check for a Snovalang plugin update", it) }.getOrNull()
+
+    private fun currentPluginVersion(): String? = runCatching {
+        SnovaLspUpdater::class.java.getResourceAsStream("/META-INF/plugin.xml")
+            ?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+                Regex("<version>\\s*([^<]+?)\\s*</version>").find(reader.readText())?.groupValues?.get(1)
+            }
+    }.getOrNull()
 
     private fun notifyPluginUpdate(project: Project, tag: String) {
         val state = PropertiesComponent.getInstance()
