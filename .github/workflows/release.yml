@@ -44,19 +44,6 @@ jobs:
         run: ./scripts/package-zed.sh
       - name: Package JetBrains plugin
         run: ./scripts/package-jetbrains.sh
-      - name: List this release in the README downloads table
-        run: node scripts/update-readme-downloads.mjs "${{ steps.version.outputs.version }}"
-      - name: Commit the release version
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md vscode/package.json vscode/package-lock.json zed/Cargo.toml zed/Cargo.lock zed/extension.toml jetbrains/gradle.properties
-          git commit -m "chore(release): v${VERSION} [skip ci]"
-          git push origin HEAD:master
-          echo "target=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-        id: release_commit
       - name: Create the GitHub release with editor packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

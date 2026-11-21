@@ -8,20 +8,9 @@ The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and 
 
 ## Downloads
 
-Every release is listed here; the release workflow adds a row for each new version. Click an editor to download its package.
+Download the latest package for your editor. GitHub lists all versions and their assets on the [releases page](https://github.com/snovalang/editor-extensions/releases).
 
-<!-- downloads:start -->
-**Latest** — [**VS Code**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) · [**Zed**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) · [**JetBrains**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip)
-
-| Version | Date | VS Code | Zed | JetBrains |
-| --- | --- | --- | --- | --- |
-| [v0.3.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.3.0) | 2026-10-05 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang-zed.tar.gz) | — |
-| [v0.2.1](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.1) | 2026-10-04 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang-zed.tar.gz) | — |
-| [v0.2.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang-zed.tar.gz) | — |
-| [v0.1.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.1.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang-zed.tar.gz) | — |
-
-Older versions: [all releases](https://github.com/snovalang/editor-extensions/releases).
-<!-- downloads:end -->
+[**VS Code**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) · [**Zed**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) · [**JetBrains**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip)
 
 The JetBrains plugin ships from the first release after v0.3.0.
 
