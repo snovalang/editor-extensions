@@ -28,12 +28,15 @@ From VS Code, download that VSIX and run **Extensions: Install from VSIX...**.
 - A `snova.lsp.serverPath` value other than `snova-lsp` is used only when that file exists and its executable header matches this system.
 - When no compatible binary is found and `snova.lsp.autoInstall` is on (the default), the extension clones [snova-lsp](https://github.com/snovalang/snova-lsp) and runs `make install` into `~/.local/bin`. **Snovalang: Install or Update Language Server** does that on demand and keeps the bundled server if the build fails.
 - The real `snova-lsp` server analyzes the open buffer as you type and publishes compiler errors and warnings in the editor and Problems panel. Semantic tokens from the server add syntax highlighting on top of the grammar-based colors.
-- Completion results, including their ranking and sort order, come directly from `snova-lsp`; the editor applies the server's `sortText` and trigger characters (`.`, `:`, and `@`).
+- Completion results, including their ranking and sort order, come directly from `snova-lsp`; the editor applies the server's `sortText` and trigger characters (`.`, `:`, and `@`). Autoimports use the builtin package declarations discovered by the compiler, such as `builtin.io.console.output` for `Console`.
 - The server also provides hover, signature help, go-to-definition, find references, find implementations, document symbols, and code actions. The extension forwards LSP requests and does not duplicate compiler analysis in the client.
 - Open a `.snl` source or a `.sns` script. `mod.sns`, `snova.sns`, `snova.mod`, `snova.toml`, and `Snovalang.toml` use the manifest grammar.
 - **Snovalang: Run Current File** runs `snl run`.
 - **Snovalang: Check Current File** runs `snl check` on the active file.
 - **Snovalang: Check Project** runs `snl check --project`.
+- **Snovalang: Build Current File** runs `snl build` on the active file.
+- **Snovalang: Build Project** runs `snl build --project`.
+- **Snovalang: Run Project** runs `snl run --project`.
 - **Snovalang: Tidy Dependencies** runs `snl tidy`.
 - **Snovalang: Get Dependencies** runs `snl get`.
 

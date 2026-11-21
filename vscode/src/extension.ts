@@ -86,7 +86,8 @@ function targetOf(args: PathArgs | undefined): { file?: string; project?: string
 }
 
 /** Runs `snl <args>` as a task in `cwd`; no shell, so paths need no quoting. */
-function runSnl(name: string, args: string[], cwd: string | undefined): Thenable<unknown> {
+async function runSnl(name: string, args: string[], cwd: string | undefined): Promise<unknown> {
+  await workspace.saveAll();
   const folder = cwd ? workspace.getWorkspaceFolder(Uri.file(cwd)) : undefined;
   const task = new Task(
     { type: "snova", command: args[0] },
@@ -230,8 +231,9 @@ export function activate(context: ExtensionContext): void {
   const log = window.createOutputChannel("Snovalang");
   context.subscriptions.push(log);
 
-  const register = (id: string, fn: (...args: any[]) => unknown) =>
-    context.subscriptions.push(commands.registerCommand(id, fn));
+  const register = <T extends unknown[]>(id: string, fn: (...args: T) => unknown): void => {
+    context.subscriptions.push(commands.registerCommand(id, (...args: unknown[]) => fn(...args as T)));
+  };
 
   register("snova.restartServer", async () => {
     const ok = await boot(context, log, false);
@@ -256,6 +258,30 @@ export function activate(context: ExtensionContext): void {
     }
     if (!requireFile(file, "check")) return;
     return runSnl(`check ${path.basename(file)}`, ["check", file], path.dirname(file));
+  });
+
+  register("snova.buildFile", () => {
+    const { file, project } = targetOf(undefined);
+    if (!requireFile(file, "build")) return;
+    return runSnl(`build ${path.basename(file)}`, ["build", file], project ?? path.dirname(file));
+  });
+
+  register("snova.buildProject", () => {
+    const { project } = targetOf(undefined);
+    if (!project) {
+      window.showErrorMessage("No Snovalang project found.");
+      return;
+    }
+    return runSnl("build project", ["build", "--project", project], project);
+  });
+
+  register("snova.runProject", () => {
+    const { project } = targetOf(undefined);
+    if (!project) {
+      window.showErrorMessage("No Snovalang project found.");
+      return;
+    }
+    return runSnl("run project", ["run", "--project", project], project);
   });
 
   register("snova.tidy", (args?: PathArgs) => {

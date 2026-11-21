@@ -110,7 +110,7 @@
     "For In Loop": {
         "prefix": "for",
         "body": [
-            "for ${1:item} in ${2:items} {",
+            "for (let ${1:item} in ${2:items}) {",
             "\t$0",
             "}"
         ],
@@ -119,7 +119,7 @@
     "For Receive Loop": {
         "prefix": "forrecv",
         "body": [
-            "for ${1:value} <~ ${2:channel} {",
+            "for (let ${1:value} <~ ${2:channel}) {",
             "\t$0",
             "}"
         ],
@@ -164,7 +164,7 @@
         "body": [
             "Console.printline(${1:\"$2\"})"
         ],
-        "description": "Writes a line to standard output (needs `import builtin.console.Console`)"
+        "description": "Writes a line to standard output (needs `import builtin.io.console.output`)"
     },
     "Data Class": {
         "prefix": "dataclass",

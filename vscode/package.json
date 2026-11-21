@@ -105,6 +105,21 @@
         "category": "Snovalang"
       },
       {
+        "command": "snova.buildFile",
+        "title": "Build Current File (snl build)",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.buildProject",
+        "title": "Build Project (snl build --project)",
+        "category": "Snovalang"
+      },
+      {
+        "command": "snova.runProject",
+        "title": "Run Project (snl run --project)",
+        "category": "Snovalang"
+      },
+      {
         "command": "snova.tidyProject",
         "title": "Tidy Dependencies (snl tidy)",
         "category": "Snovalang"
@@ -124,7 +139,7 @@
         "properties": {
           "command": {
             "type": "string",
-            "description": "The snl subcommand (run, check, tidy, get)."
+            "description": "The snl subcommand (run, build, check, tidy, get)."
           }
         }
       }
