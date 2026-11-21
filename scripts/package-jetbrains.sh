@@ -30,7 +30,8 @@ for relative in \
   textmate/snovalang/syntaxes/snovalang.tmLanguage.json \
   textmate/snovalang/syntaxes/snovalang-manifest.tmLanguage.json \
   textmate/snovalang/snippets/snovalang.json \
-  server/snova-lsp server/snova-lsp.exe server/snova-lsp-darwin; do
+  server/snova-lsp server/snova-lsp.exe server/snova-lsp-darwin \
+  server/builtin/core/types/values/Option.snl; do
   printf '%s\n' "$listing" | grep -qx "$top/$relative" || {
     echo "snovalang-jetbrains.zip is missing $top/$relative" >&2
     exit 1

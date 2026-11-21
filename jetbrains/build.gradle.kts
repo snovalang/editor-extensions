@@ -17,7 +17,7 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
-        // 2025.1 bundles the Kotlin 2.1 standard library.
+        // 2025.2 bundles a Kotlin 2.1+ standard library.
         apiVersion.set(KotlinVersion.KOTLIN_2_1)
         languageVersion.set(KotlinVersion.KOTLIN_2_1)
     }
@@ -69,15 +69,26 @@ val textMateBundle = copySpec {
 }
 
 // The same snova-lsp binaries the VSIX ships: Linux ELF, Windows PE and a
-// universal Mach-O for macOS.
+// universal Mach-O for macOS, plus the compiler builtins snova-lsp finds in
+// the `builtin` directory beside its executable.
 val serverBinaries = copySpec {
     from(vscodeDir.dir("server")) {
         include("snova-lsp", "snova-lsp.exe", "snova-lsp-darwin")
         filePermissions { unix("rwxr-xr-x") }
     }
+    from(vscodeDir.dir("server")) {
+        include("builtin/**")
+    }
 }
 
 tasks {
+    // The zip task does not inherit the sandbox's file modes, so mark the
+    // server executables here. SnovaServerLocator also restores the bit.
+    buildPlugin {
+        filesMatching(listOf("**/server/snova-lsp", "**/server/snova-lsp-darwin")) {
+            permissions { unix("rwxr-xr-x") }
+        }
+    }
     prepareSandbox {
         into(intellijPlatform.projectName) {
             into("textmate/snovalang") { with(textMateBundle) }

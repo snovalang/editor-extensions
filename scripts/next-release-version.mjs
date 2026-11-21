@@ -22,6 +22,9 @@ const previousTag = tags[0];
 const range = previousTag ? `${previousTag}..HEAD` : "HEAD";
 const messages = run("log", range, "--format=%s%n%b%x00")
   .split("\0")
+  // git log puts a newline after each NUL, so every message but the first
+  // would otherwise start with an empty "subject" line.
+  .map((message) => message.replace(/^\s+/, ""))
   .filter(Boolean);
 const rank = { patch: 0, minor: 1, major: 2 };
 const semverType = messages.reduce((release, message) => {
