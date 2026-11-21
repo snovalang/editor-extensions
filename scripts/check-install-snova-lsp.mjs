@@ -8,6 +8,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const installer = path.join(root, "scripts/install-snova-lsp.sh");
 const linuxBin = path.join(root, "vscode/server/snova-lsp");
 const windowsBin = path.join(root, "vscode/server/snova-lsp.exe");
+const hostBin = process.platform === "darwin"
+  ? path.join(root, "vscode/server/snova-lsp-darwin")
+  : process.platform === "win32" ? windowsBin : linuxBin;
+const wrongHostBin = process.platform === "win32" ? linuxBin : windowsBin;
 
 function fail(message) {
   console.error(message);
@@ -33,7 +37,7 @@ try {
     {
       HOME: home,
       PREFIX: prefix,
-      SNOVA_LSP_BIN: linuxBin,
+      SNOVA_LSP_BIN: hostBin,
       SNOVA_LSP_NO_BUILD: "1",
     },
     0,
@@ -48,7 +52,7 @@ try {
     {
       HOME: home,
       PREFIX: prefix,
-      SNOVA_LSP_BIN: linuxBin,
+      SNOVA_LSP_BIN: hostBin,
       SNOVA_LSP_NO_BUILD: "1",
     },
     0,
@@ -59,7 +63,7 @@ try {
     {
       HOME: wrong,
       PREFIX: path.join(wrong, ".local"),
-      SNOVA_LSP_BIN: windowsBin,
+      SNOVA_LSP_BIN: wrongHostBin,
       SNOVA_LSP_NO_BUILD: "1",
     },
     1,
@@ -71,7 +75,7 @@ try {
   const bundleHome = mkdtempSync(path.join(tmpdir(), "snova-bundle-"));
   const bundle = path.join(bundleHome, "bundle");
   mkdirSync(bundle, { recursive: true });
-  copyFileSync(linuxBin, path.join(bundle, "snova-lsp"));
+  copyFileSync(hostBin, path.join(bundle, "snova-lsp"));
   chmodSync(path.join(bundle, "snova-lsp"), 0o755);
   const bundlePrefix = path.join(bundleHome, "prefix");
   run(

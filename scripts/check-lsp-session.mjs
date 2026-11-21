@@ -66,6 +66,7 @@ function readMessages(child) {
 const sample = "package demo\n\nfunc hello(): int {\n    return 1\n}\n";
 const changed = `${sample}// edited\n`;
 const uri = "file:///tmp/demo/main.snl";
+const builtinSource = "package demo\n\nfunc main() {\n    Console\n}\n";
 
 function requests(idBase) {
   return [
@@ -139,6 +140,20 @@ function requests(idBase) {
         range: { start: { line: 2, character: 5 }, end: { line: 2, character: 10 } },
         context: { diagnostics: [] },
       },
+    },
+    {
+      jsonrpc: "2.0",
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri, version: 3 },
+        contentChanges: [{ text: builtinSource }],
+      },
+    },
+    {
+      jsonrpc: "2.0",
+      id: idBase + 9,
+      method: "textDocument/completion",
+      params: { textDocument: { uri }, position: { line: 3, character: 11 } },
     },
     { jsonrpc: "2.0", id: idBase + 8, method: "shutdown", params: null },
     { jsonrpc: "2.0", method: "exit" },
@@ -219,7 +234,16 @@ console.log("lsp session: fake server scripts/fake-snova-lsp.mjs");
 if (runnable) {
   const dir = mkdtempSync(path.join(tmpdir(), "snova-lsp-"));
   const logFile = path.join(dir, "snova-lsp.log");
-  await runSession(bundled, serverLaunch(logFile).args, 100);
+  const messages = await runSession(bundled, serverLaunch(logFile).args, 100);
+  const consolePackage = /^package\s+([^\s]+)/m.exec(readFileSync(
+    path.join(root, "vscode/server/builtin/io/console/output/Console.snl"), "utf8",
+  ))?.[1];
+  assert(consolePackage, "bundled Console declares its package");
+  const builtinCompletion = messages.find((message) => message.id === 109);
+  const consoleImport = builtinCompletion?.result?.items?.find((item) =>
+    item.label === "Console" && item.additionalTextEdits?.some((edit) =>
+      edit.newText.includes(`import ${consolePackage}`)));
+  assert(consoleImport, `bundled LSP auto-imports Console from ${consolePackage}`);
   assert(existsSync(logFile), "snova-lsp --log creates the log file");
   console.log(`lsp session: local binary ${bundled}`);
 } else {

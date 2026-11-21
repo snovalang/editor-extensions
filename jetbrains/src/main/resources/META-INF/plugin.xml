@@ -12,7 +12,7 @@
       <li>Diagnostics, completion, hover, navigation and the other features
           <a href="https://github.com/snovalang/snova-lsp">snova-lsp</a> advertises, through the IDE's
           built-in Language Server Protocol client. The plugin ships snova-lsp for Linux, Windows and macOS.</li>
-      <li><b>Tools | Snovalang</b> actions that run <code>snl run</code>, <code>snl check</code>,
+      <li><b>Tools | Snovalang</b> actions that run <code>snl run</code>, <code>snl build</code>, <code>snl check</code>,
           <code>snl tidy</code> and <code>snl get</code> in the Run tool window</li>
     </ul>
     ]]></description>
@@ -48,6 +48,12 @@
                     text="Check Current File (snl check)"/>
             <action id="Snovalang.CheckProject" class="io.github.snovalang.intellij.actions.CheckProjectAction"
                     text="Check Project (snl check --project)"/>
+            <action id="Snovalang.BuildFile" class="io.github.snovalang.intellij.actions.BuildFileAction"
+                    text="Build Current File (snl build)"/>
+            <action id="Snovalang.BuildProject" class="io.github.snovalang.intellij.actions.BuildProjectAction"
+                    text="Build Project (snl build --project)"/>
+            <action id="Snovalang.RunProject" class="io.github.snovalang.intellij.actions.RunProjectAction"
+                    text="Run Project (snl run --project)"/>
             <action id="Snovalang.Tidy" class="io.github.snovalang.intellij.actions.TidyAction"
                     text="Tidy Dependencies (snl tidy)"/>
             <action id="Snovalang.Get" class="io.github.snovalang.intellij.actions.GetDependenciesAction"
