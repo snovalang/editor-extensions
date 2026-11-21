@@ -4,19 +4,8 @@ on:
   pull_request:
 
 jobs:
-  build-macos-lsp:
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build universal macOS LSP
-        run: ./scripts/build-macos-universal-lsp.sh
-      - uses: actions/upload-artifact@v4
-        with:
-          name: snova-lsp-macos
-          path: vscode/server/snova-lsp-darwin
   package:
     runs-on: ubuntu-latest
-    needs: build-macos-lsp
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,10 +14,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-wasip2
-      - uses: actions/download-artifact@v4
-        with:
-          name: snova-lsp-macos
-          path: vscode/server
       - name: Build Linux LSP
         run: ./scripts/build-linux-lsp.sh
       - name: Package VS Code extension
