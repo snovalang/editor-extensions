@@ -2,6 +2,8 @@ package io.github.snovalang.intellij.lsp
 
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.application.PathManager
+import com.google.gson.JsonParser
 import io.github.snovalang.intellij.SnovaFiles
 import io.github.snovalang.intellij.settings.SnovaSettings
 import java.io.File
@@ -36,10 +38,23 @@ object SnovaServerLocator {
             if (matchesHost(path)) return prepare(path)
             LOG.warn("Ignoring snova-lsp path '$configured': missing or not built for this system")
         }
-        return candidates().firstOrNull(::matchesHost)?.let(::prepare)
+        return managedUpdate()
+            ?: candidates().firstOrNull(::matchesHost)?.let(::prepare)
             ?: findOnPath(installedName)
             ?: findOnPath(aliasName)
     }
+
+    /** An automatically updated release binary takes precedence over the bundled copy. */
+    private fun managedUpdate(): Path? = runCatching {
+        val root = PathManager.getConfigDir().resolve("snovalang").resolve("lsp-updates")
+        val latest = root.resolve("latest.json")
+        if (!Files.isRegularFile(latest)) return null
+        val tag = JsonParser.parseString(Files.readString(latest)).asJsonObject.get("tag").asString
+        val binary = root.resolve(tag.removePrefix("v").replace(Regex("[^A-Za-z0-9._-]"), "_"))
+            .resolve("server")
+            .resolve(bundledName)
+        if (matchesHost(binary)) prepare(binary) else null
+    }.getOrNull()
 
     /** First executable named [name] in a PATH directory. */
     private fun findOnPath(name: String): Path? =
@@ -71,7 +86,7 @@ object SnovaServerLocator {
         return path
     }
 
-    private fun matchesHost(path: Path): Boolean {
+    internal fun matchesHost(path: Path): Boolean {
         if (!Files.isRegularFile(path)) return false
         val kind = runCatching { kindOf(path) }.getOrDefault(Kind.UNKNOWN)
         return when {

@@ -74,7 +74,23 @@ Windows (PowerShell):
 irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-zed.ps1 | iex
 ```
 
-Both scripts download [snovalang-zed.tar.gz](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) and extract it into Zed's installed-extensions directory (`~/.local/share/zed/extensions/installed/snovalang` on Linux, `~/Library/Application Support/Zed/extensions/installed/snovalang` on macOS, `%LOCALAPPDATA%\Zed\extensions\installed\snovalang` on Windows). The archive contains the Zed extension component (`extension.wasm`), compiled Tree-sitter grammars and language queries. Zed does not publish a standalone `.wasi` file format: its extension uses a `wasm32-wasip2` component inside this archive. Install `snova-lsp` separately and make it available on `PATH`; the extension resolves it through Zed's `Worktree::which` API and does not bundle or install the server. Restart Zed, or run **zed: reload extensions**.
+Both scripts download [snovalang-zed.tar.gz](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) and extract it into Zed's installed-extensions directory (`~/.local/share/zed/extensions/installed/snovalang` on Linux, `~/Library/Application Support/Zed/extensions/installed/snovalang` on macOS, `%LOCALAPPDATA%\Zed\extensions\installed\snovalang` on Windows). The archive contains the Zed extension component (`extension.wasm`), compiled Tree-sitter grammars and language queries. Zed does not publish a standalone `.wasi` file format: its extension uses a `wasm32-wasip2` component inside this archive. At first start and every six hours, the extension checks the newest editor release and downloads the matching standalone `snova-lsp` binary into Zed's extension work directory. If downloading is unavailable, it falls back to `snova-lsp` on the worktree `PATH`. The process writes LSP protocol logs to `.snova-lsp.log` in the worktree root. Restart Zed, or run **zed: reload extensions**.
+
+The extension requires Zed's `download_file` capability for GitHub release assets to install/update the LSP. If extension downloads are restricted in your settings, allow this release path:
+
+```json
+{
+  "granted_extension_capabilities": [
+    {
+      "kind": "download_file",
+      "host": "github.com",
+      "path": ["snovalang", "editor-extensions", "releases", "download", "**"]
+    }
+  ]
+}
+```
+
+For richer highlighting, enable LSP semantic tokens with `"semantic_tokens": "combined"` in Zed settings; the extension provides token styles for both source and manifest files.
 
 After the extension is accepted into the [Zed extension repository](https://github.com/zed-industries/extensions), it also appears in the Extensions gallery. The release archive is the install path that works before that listing exists.
 
@@ -109,7 +125,7 @@ After the extension is accepted into the [Zed extension repository](https://gith
 ### Zed ([`zed/`](zed/))
 
 - Tree-sitter highlighting, brackets, indents, and outline
-- One `snova-lsp` process per worktree, resolved from the worktree's `PATH`. Import completion and auto-import come from the server; `make install` in snova-lsp also installs the builtins it completes (`~/.snovalang/std/src`)
+- One `snova-lsp` process per worktree, auto-downloaded and checked for updates from GitHub releases, with a `PATH` fallback. Zed maps each language to the LSP's required `snova`/`snova-manifest` IDs and logs protocol traffic to `.snova-lsp.log`. Import completion and auto-import come from the server; the LSP package includes compiler builtins
 - `.snl` / `.sns` sources and manifest suffixes with indentation, comment toggling, brackets, highlighting and code outline
 
 ## Developing

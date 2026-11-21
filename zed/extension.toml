@@ -19,3 +19,7 @@ rev = "98412f8eef277f02ecc0b840cf26146d6f833e26"
 [language_servers.snova_lsp]
 name = "Snovalang Language Server"
 languages = ["Snovalang", "Snovalang Manifest"]
+
+[language_servers.snova_lsp.language_ids]
+"Snovalang" = "snova"
+"Snovalang Manifest" = "snova-manifest"

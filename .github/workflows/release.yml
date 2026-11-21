@@ -40,6 +40,11 @@ jobs:
         run: node scripts/set-release-version.mjs "${{ steps.version.outputs.version }}"
       - name: Package VS Code extension
         run: ./scripts/package-vscode.sh
+      - name: Add standalone LSP binaries to the release
+        run: |
+          cp vscode/server/snova-lsp dist/snova-lsp-linux-x86_64
+          cp vscode/server/snova-lsp.exe dist/snova-lsp-windows-x86_64.exe
+          cp vscode/server/snova-lsp-darwin dist/snova-lsp-macos-universal
       - name: Package Zed extension
         run: ./scripts/package-zed.sh
       - name: Package JetBrains plugin
@@ -54,6 +59,9 @@ jobs:
             dist/snovalang.vsix \
             dist/snovalang-zed.tar.gz \
             dist/snovalang-jetbrains.zip \
+            dist/snova-lsp-linux-x86_64 \
+            dist/snova-lsp-windows-x86_64.exe \
+            dist/snova-lsp-macos-universal \
             --target "$TARGET" \
             --title "Snovalang v${VERSION}" \
             --generate-notes

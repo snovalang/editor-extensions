@@ -16,6 +16,7 @@ import {
   Task,
   TaskScope,
   Uri,
+  env,
 } from "vscode";
 import {
   LanguageClient,
@@ -27,6 +28,7 @@ import {
 import type * as lsp from "vscode-languageclient";
 import { documentSelector, MANIFEST_FILENAMES, serverLaunch } from "./lspContract";
 import { canonicalPath, ensureServerBinary } from "./serverInstall";
+import { isNewerVersion, latestGitHubRelease } from "./updateCheck";
 
 let client: LanguageClient | undefined;
 let bootQueue: Promise<void> = Promise.resolve();
@@ -230,6 +232,31 @@ function boot(context: ExtensionContext, log: OutputChannel, force: boolean): Pr
 export function activate(context: ExtensionContext): void {
   const log = window.createOutputChannel("Snovalang");
   context.subscriptions.push(log);
+
+  const checkRelease = async (repo: string, label: string, current: string | undefined): Promise<void> => {
+    if (!current) return;
+    const latest = await latestGitHubRelease("snovalang", repo);
+    if (!latest || !isNewerVersion(latest, current)) return;
+    const key = `updateNotice.${repo}`;
+    if (context.globalState.get<string>(key) === latest) return;
+    await context.globalState.update(key, latest);
+    const action = await window.showInformationMessage(
+      `Uma nova versão do ${label} está disponível (${current} → ${latest}). Atualize para receber correções e melhorias.`,
+      "Ver atualização",
+    );
+    if (action) await env.openExternal(Uri.parse(`https://github.com/snovalang/${repo}/releases/latest`));
+  };
+  const checkExtensionRelease = () =>
+    checkRelease(
+      "editor-extensions",
+      "pacote Snovalang (plugin e LSP)",
+      String(context.extension.packageJSON.version ?? ""),
+    );
+  void checkExtensionRelease();
+  const updateTimer = setInterval(() => {
+    void checkExtensionRelease();
+  }, 6 * 60 * 60 * 1000);
+  context.subscriptions.push({ dispose: () => clearInterval(updateTimer) });
 
   const cursorAnalysisTimers = new Map<string, ReturnType<typeof setTimeout>>();
   context.subscriptions.push({

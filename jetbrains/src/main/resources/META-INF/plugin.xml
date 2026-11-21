@@ -24,6 +24,7 @@
     <depends>org.jetbrains.plugins.textmate</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="io.github.snovalang.intellij.lsp.SnovaLspUpdater"/>
         <platform.lsp.serverSupportProvider
                 implementation="io.github.snovalang.intellij.lsp.SnovaLspServerSupportProvider"/>
         <fileIconProvider implementation="io.github.snovalang.intellij.SnovaFileIconProvider"/>
