@@ -17,8 +17,8 @@
     </ul>
     ]]></description>
 
-    <!-- The LSP API is part of every commercial JetBrains IDE and of unified PyCharm since 2025.1.
-         Open-source IntelliJ IDEA builds and Android Studio do not include it. -->
+    <!-- com.intellij.modules.lsp exists from 2025.2. Open-source IntelliJ IDEA builds and
+         Android Studio do not include the LSP API. -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lsp</depends>
     <depends>org.jetbrains.plugins.textmate</depends>

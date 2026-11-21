@@ -1,5 +1,5 @@
 # Install the prebuilt Snovalang plugin from the latest GitHub release into
-# every JetBrains IDE 2025.1 or newer found for this user. Restart the IDEs
+# every JetBrains IDE 2025.2 or newer found for this user. Restart the IDEs
 # afterwards. Open-source IntelliJ IDEA (IdeaIC) and PyCharm CE builds lack the
 # LSP API the plugin uses, so they are skipped.
 $ErrorActionPreference = "Stop"
@@ -26,7 +26,7 @@ try {
         if ($dir.Name -notmatch '^([A-Za-z]+)(20\d\d)\.(\d+)$') { continue }
         if (@("IdeaIC", "PyCharmCE") -contains $Matches[1]) { continue }
         $year = [int]$Matches[2]; $minor = [int]$Matches[3]
-        if ($year -lt 2025 -or ($year -eq 2025 -and $minor -lt 1)) { continue }
+        if ($year -lt 2025 -or ($year -eq 2025 -and $minor -lt 2)) { continue }
 
         $plugins = Join-Path $dir.FullName "plugins"
         New-Item -ItemType Directory -Force -Path $plugins | Out-Null
@@ -37,7 +37,7 @@ try {
         $count++
     }
     if ($count -eq 0) {
-        throw "No JetBrains IDE 2025.1 or newer found. Use Settings | Plugins | gear icon | Install Plugin from Disk..."
+        throw "No JetBrains IDE 2025.2 or newer found. Use Settings | Plugins | gear icon | Install Plugin from Disk..."
     }
     Write-Host "Restart the IDE(s) to load the plugin."
 } finally {

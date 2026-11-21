@@ -46,7 +46,7 @@ The release workflow publishes that same VSIX to the Visual Studio Marketplace a
 
 ## JetBrains IDEs
 
-IntelliJ IDEA, PyCharm, WebStorm, GoLand, CLion, Rider, RustRover, PhpStorm, RubyMine, DataGrip and DataSpell, version 2025.1 or newer. The plugin uses the IDE's built-in LSP client, which open-source IntelliJ IDEA builds and Android Studio do not include. The plugin declares no upper version bound, so new IDE releases load it without a plugin update.
+IntelliJ IDEA, PyCharm, WebStorm, GoLand, CLion, Rider, RustRover, PhpStorm, RubyMine, DataGrip and DataSpell, version 2025.2 or newer. The plugin uses the IDE's built-in LSP client, which open-source IntelliJ IDEA builds and Android Studio do not include. The plugin declares no upper version bound, so new IDE releases load it without a plugin update; every pull request runs the IntelliJ Plugin Verifier against the current releases from 2025.2 through the newest.
 
 Linux and macOS:
 
@@ -60,7 +60,7 @@ Windows (PowerShell):
 irm https://raw.githubusercontent.com/snovalang/editor-extensions/master/install-jetbrains.ps1 | iex
 ```
 
-Both scripts download [snovalang-jetbrains.zip](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip) and copy the plugin into every JetBrains IDE 2025.1 or newer that has a configuration directory for the current user. Restart the IDE afterwards.
+Both scripts download [snovalang-jetbrains.zip](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip) and copy the plugin into every JetBrains IDE 2025.2 or newer that has a configuration directory for the current user. Restart the IDE afterwards.
 
 From the IDE, download the zip and open **Settings | Plugins | ⚙ | Install Plugin from Disk...**.
 

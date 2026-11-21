@@ -1,10 +1,10 @@
 package io.github.snovalang.intellij.lsp
 
-import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.SystemInfo
 import io.github.snovalang.intellij.SnovaFiles
 import io.github.snovalang.intellij.settings.SnovaSettings
+import java.io.File
 import java.io.RandomAccessFile
 import java.nio.file.Files
 import java.nio.file.Path
@@ -37,9 +37,17 @@ object SnovaServerLocator {
             LOG.warn("Ignoring snova-lsp path '$configured': missing or not built for this system")
         }
         return candidates().firstOrNull(::matchesHost)?.let(::prepare)
-            ?: PathEnvironmentVariableUtil.findInPath(installedName)?.toPath()
-            ?: PathEnvironmentVariableUtil.findInPath(aliasName)?.toPath()
+            ?: findOnPath(installedName)
+            ?: findOnPath(aliasName)
     }
+
+    /** First executable named [name] in a PATH directory. */
+    private fun findOnPath(name: String): Path? =
+        System.getenv("PATH").orEmpty()
+            .split(File.pathSeparatorChar)
+            .filter { it.isNotBlank() }
+            .map { Path.of(it.trim('"')).resolve(name) }
+            .firstOrNull { Files.isRegularFile(it) && (SystemInfo.isWindows || Files.isExecutable(it)) }
 
     private fun candidates(): List<Path> {
         val home = Path.of(System.getProperty("user.home"))

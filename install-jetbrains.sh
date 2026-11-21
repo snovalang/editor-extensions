@@ -1,6 +1,6 @@
 #!/bin/sh
 # Install the prebuilt Snovalang plugin from the latest GitHub release into
-# every JetBrains IDE 2025.1 or newer found for this user. Restart the IDEs
+# every JetBrains IDE 2025.2 or newer found for this user. Restart the IDEs
 # afterwards. Open-source IntelliJ IDEA (IdeaIC) and PyCharm CE builds lack the
 # LSP API the plugin uses, so they are skipped.
 set -eu
@@ -38,7 +38,7 @@ for dir in "$config_root"/*; do
   case "$product" in IdeaIC|PyCharmCE|AndroidStudio) continue ;; esac
   year=$(printf '%s' "$name" | sed 's/^[A-Za-z]*\(20[0-9][0-9]\)\..*/\1/')
   minor=$(printf '%s' "$name" | sed 's/^.*\.\([0-9]*\)$/\1/')
-  [ "$year" -gt 2025 ] || { [ "$year" -eq 2025 ] && [ "$minor" -ge 1 ]; } || continue
+  [ "$year" -gt 2025 ] || { [ "$year" -eq 2025 ] && [ "$minor" -ge 2 ]; } || continue
 
   if [ "$(uname -s)" = Darwin ]; then plugins="$dir/plugins"; else plugins="$data_root/$name"; fi
   mkdir -p "$plugins"
@@ -49,7 +49,7 @@ for dir in "$config_root"/*; do
 done
 
 if [ "$count" -eq 0 ]; then
-  echo "No JetBrains IDE 2025.1 or newer found. Install the zip with" >&2
+  echo "No JetBrains IDE 2025.2 or newer found. Install the zip with" >&2
   echo "Settings | Plugins | gear icon | Install Plugin from Disk..." >&2
   exit 1
 fi
