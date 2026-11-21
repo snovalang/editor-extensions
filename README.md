@@ -4,7 +4,7 @@ Syntax highlighting, snippets, and language-server support for Snovalang in VS C
 
 Diagnostics, hover, completion, signature help, and navigation come from [snova-lsp](https://github.com/snovalang/snova-lsp). Each editor starts one server process per workspace, in the background, when a Snovalang file is opened. Run and check actions still call the installed compiler command, `snl`.
 
-The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`. If no shipped binary matches, VS Code can clone `https://github.com/snovalang/snova-lsp` and run `make install`. The JetBrains plugin ships the same three binaries. Zed requires a separately installed `snova-lsp` on the worktree's `PATH`, as described below. On macOS VS Code starts the universal Mach-O binary and does not launch the Linux or Windows executable.
+The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`, with the compiler builtins in `server/builtin` beside them, so builtin packages complete and auto-import without a separate toolchain install. If no shipped binary matches, VS Code can clone `https://github.com/snovalang/snova-lsp` and run `make install`. The JetBrains plugin ships the same three binaries. Zed requires a separately installed `snova-lsp` on the worktree's `PATH`, as described below. On macOS VS Code starts the universal Mach-O binary and does not launch the Linux or Windows executable.
 
 ## Downloads
 
@@ -93,6 +93,8 @@ After the extension is accepted into the [Zed extension repository](https://gith
 - Manifest highlighting for `mod.sns` and `snova.sns`
 - Bundled language server: Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and universal Mach-O `snova-lsp-darwin`
 - When no compatible binary is present, `snova.lsp.autoInstall` (default on) runs `make install` from [snova-lsp](https://github.com/snovalang/snova-lsp) into `~/.local/bin`
+- Import completion one package segment at a time (`import builtin.io.` → `console`, `filesystem`), for builtins, project packages and `.snovalang/deps`
+- Auto-import ranked by the project: completing a symbol from another package adds its import in sorted position; the project's own packages and packages other files already import come first. The "not imported" quick fix marks the same best package as preferred
 - Snippets (`func`, `method`, `class`, `data class`, `extension`, `struct`, `enum`, `match`, `for`, `pulsar`)
 - Language configuration (brackets and auto-closing pairs)
 - One stdio language client for `snova-lsp` per window. Features follow the server's initialize result (full-document sync, diagnostics, completion, hover, definition, references, symbols, signature help, code actions, semantic tokens)
@@ -107,13 +109,13 @@ After the extension is accepted into the [Zed extension repository](https://gith
 - Highlighting, brackets, comment toggling and snippets from the VS Code TextMate grammars, language configuration and snippets
 - Snovalang file icons
 - Bundled `snova-lsp` (the same Linux, Windows and universal Mach-O binaries as the VSIX), then `~/.local/bin/snova-lsp`, then `PATH`. **Settings | Languages & Frameworks | Snovalang** sets a custom server path, the `snl` path and server logging
-- One `snova-lsp` per project, through the IDE's LSP client
+- One `snova-lsp` per project, through the IDE's LSP client, with the same import completion and project-ranked auto-import as VS Code
 - **Tools | Snovalang** runs `snl run`, `snl check`, `snl check --project`, `snl tidy` and `snl get` in the Run tool window, and restarts the language server
 
 ### Zed ([`zed/`](zed/))
 
 - Tree-sitter highlighting, brackets, indents, and outline
-- One `snova-lsp` process per worktree, resolved from the worktree's `PATH`
+- One `snova-lsp` process per worktree, resolved from the worktree's `PATH`. Import completion and auto-import come from the server; `make install` in snova-lsp also installs the builtins it completes (`~/.snovalang/std/src`)
 - `.snl` / `.sns` sources and manifest suffixes with indentation, comment toggling, brackets, highlighting and code outline
 
 ## Developing

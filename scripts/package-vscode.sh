@@ -11,7 +11,9 @@ mkdir -p "$ROOT/dist" "$ROOT/vscode/server"
 if [ -n "${SNOVA_LSP_BIN:-}" ] && [ -f "$SNOVA_LSP_BIN" ]; then
   cp "$SNOVA_LSP_BIN" "$ROOT/vscode/server/snova-lsp"
   chmod 755 "$ROOT/vscode/server/snova-lsp"
-elif [ -f "$ROOT/../snova-lsp/build/snova-lsp" ]; then
+elif [ -f "$ROOT/../snova-lsp/build/snova-lsp" ] &&
+     file "$ROOT/../snova-lsp/build/snova-lsp" | grep -q "ELF"; then
+  # Only a Linux build replaces the bundled ELF; a macOS checkout builds Mach-O.
   cp "$ROOT/../snova-lsp/build/snova-lsp" "$ROOT/vscode/server/snova-lsp"
   chmod 755 "$ROOT/vscode/server/snova-lsp"
 fi
@@ -24,6 +26,19 @@ if [ -n "${SNOVA_LSP_DARWIN_BIN:-}" ] && [ -f "$SNOVA_LSP_DARWIN_BIN" ]; then
   cp "$SNOVA_LSP_DARWIN_BIN" "$ROOT/vscode/server/snova-lsp-darwin"
   chmod 755 "$ROOT/vscode/server/snova-lsp-darwin"
 fi
+
+# Compiler builtins ship next to the server: snova-lsp finds a `builtin`
+# directory beside its executable, so import completion and auto-import work
+# without `make install`. SNOVA_BUILTIN_SRC overrides the sibling checkout.
+builtin_src="${SNOVA_BUILTIN_SRC:-$ROOT/../snova-lsp/build/deps/snovac/builtin}"
+if [ -d "$builtin_src" ]; then
+  rm -rf "$ROOT/vscode/server/builtin"
+  cp -R "$builtin_src" "$ROOT/vscode/server/builtin"
+fi
+[ -f "$ROOT/vscode/server/builtin/core/types/values/Option.snl" ] || {
+  echo "snovalang.vsix needs the compiler builtins in vscode/server/builtin" >&2
+  exit 1
+}
 
 for required in snova-lsp snova-lsp.exe snova-lsp-darwin; do
   if [ ! -f "$ROOT/vscode/server/$required" ]; then
@@ -77,6 +92,10 @@ printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp.exe' || {
 }
 printf '%s\n' "$listing" | grep -qx 'extension/server/snova-lsp-darwin' || {
   echo "snovalang.vsix is missing extension/server/snova-lsp-darwin" >&2
+  exit 1
+}
+printf '%s\n' "$listing" | grep -qx 'extension/server/builtin/core/types/values/Option.snl' || {
+  echo "snovalang.vsix is missing the compiler builtins" >&2
   exit 1
 }
 for icon in snovalang-light.png snovalang-dark.png; do
