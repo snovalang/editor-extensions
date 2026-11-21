@@ -88,11 +88,11 @@ const linuxPaths = serverSearchPaths({
   workspaceRoots: ["/work"],
   host: "linux",
 });
-assert(linuxPaths[0] === "/ext/server/snova-lsp", "bundled linux binary is first");
-assert(linuxPaths[1] === "/home/u/.local/bin/snova-lsp", "make install directory is second");
-assert(linuxPaths[2] === "/home/u/.local/bin/snovalang-lsp", "make install alias is third");
-assert(linuxPaths[3] === "/home/u/.snova/bin/snova-lsp", "legacy install directory stays available");
-assert(linuxPaths.includes("/work/build/snova-lsp"), "workspace build output is searched");
+assert(linuxPaths[0] === path.join("/ext", "server", "snova-lsp"), "bundled linux binary is first");
+assert(linuxPaths[1] === path.join("/home/u", ".local", "bin", "snova-lsp"), "make install directory is second");
+assert(linuxPaths[2] === path.join("/home/u", ".local", "bin", "snovalang-lsp"), "make install alias is third");
+assert(linuxPaths[3] === path.join("/home/u", ".snova", "bin", "snova-lsp"), "legacy install directory stays available");
+assert(linuxPaths.includes(path.join("/work", "build", "snova-lsp")), "workspace build output is searched");
 
 const darwinPaths = serverSearchPaths({
   extensionPath: "/ext",
@@ -101,8 +101,8 @@ const darwinPaths = serverSearchPaths({
   workspaceRoots: [],
   host: "darwin",
 });
-assert(darwinPaths[0] === "/ext/server/snova-lsp-darwin", "darwin bundle name is first");
-assert(darwinPaths[1] === "/ext/server/snova-lsp", "plain name is the make install fallback");
+assert(darwinPaths[0] === path.join("/ext", "server", "snova-lsp-darwin"), "darwin bundle name is first");
+assert(darwinPaths[1] === path.join("/ext", "server", "snova-lsp"), "plain name is the make install fallback");
 
 assert(JSON.stringify(serverLaunch().args) === "[]", "stdio needs no arguments");
 assert(

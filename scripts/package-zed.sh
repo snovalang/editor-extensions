@@ -115,6 +115,12 @@ compile_grammar snovalang "$ZED/tree-sitter-snovalang/src"
 compile_grammar snovalang_manifest "$ZED/tree-sitter-snovalang-manifest/src"
 
 cp "$ZED/extension.toml" "$PKG/extension.toml"
+# Zed fetches grammar sources from immutable repository revisions. Pin the
+# packaged extension to the commit whose grammar queries are in this release.
+revision=$(git -C "$ROOT" rev-parse HEAD)
+sed "s/^rev = \".*\"$/rev = \"$revision\"/" \
+  "$PKG/extension.toml" > "$PKG/extension.toml.tmp"
+mv "$PKG/extension.toml.tmp" "$PKG/extension.toml"
 cp "$wasm" "$PKG/extension.wasm"
 cp -R "$ZED/languages/snovalang" "$PKG/languages/snovalang"
 cp -R "$ZED/languages/snovalang_manifest" "$PKG/languages/snovalang_manifest"

@@ -81,14 +81,14 @@
         "declarations": {
             "patterns": [
                 {
-                    "match": "\\b(?:data\\s+|abstract\\s+)?(class|struct|enum|interface)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "match": "\\b(?:(?:data|abstract)\\s+)?(class|struct|enum|interface|trait)\\s+([A-Za-z_][A-Za-z0-9_]*)",
                     "captures": {
                         "1": { "name": "keyword.declaration.snova" },
                         "2": { "name": "entity.name.type.snova" }
                     }
                 },
                 {
-                    "match": "\\b(func|method)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "match": "\\b(func|method|pulsar)\\s+([A-Za-z_][A-Za-z0-9_]*)",
                     "captures": {
                         "1": { "name": "keyword.declaration.snova" },
                         "2": { "name": "entity.name.function.snova" }
@@ -106,6 +106,12 @@
                     "captures": {
                         "1": { "name": "keyword.declaration.snova" },
                         "2": { "name": "entity.name.type.snova" }
+                    }
+                },
+                {
+                    "match": "\\btypealias\\s+([A-Za-z_][A-Za-z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "entity.name.type.snova" }
                     }
                 },
                 {
@@ -130,11 +136,11 @@
                 },
                 {
                     "name": "keyword.declaration.snova",
-                    "match": "\\b(package|import|class|struct|enum|interface|func|method|let|var|const|extension|extends|implements)\\b"
+                    "match": "\\b(package|import|using|class|struct|enum|interface|trait|func|method|pulsar|let|var|const|extension|extends|implements|typealias)\\b"
                 },
                 {
                     "name": "storage.modifier.snova",
-                    "match": "\\b(public|private|protected|override|static|async|abstract|data|unsafe|sealed|final|open|internal)\\b"
+                    "match": "\\b(public|private|protected|override|static|async|abstract|data|unsafe|sealed|final|open|internal|mut)\\b"
                 },
                 {
                     "name": "keyword.other.snova",
