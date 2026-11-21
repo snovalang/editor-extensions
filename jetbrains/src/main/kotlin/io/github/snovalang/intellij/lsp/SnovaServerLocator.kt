@@ -44,12 +44,12 @@ object SnovaServerLocator {
     private fun candidates(): List<Path> {
         val home = Path.of(System.getProperty("user.home"))
         val paths = mutableListOf<Path>()
-        SnovaFiles.pluginDir()?.resolve("server")?.let { paths += it.resolve(bundledName) }
-        paths += home.resolve(".local/bin").resolve(installedName)
-        paths += home.resolve(".local/bin").resolve(aliasName)
-        paths += home.resolve(".snova/bin").resolve(installedName)
+        SnovaFiles.pluginDir()?.resolve("server")?.let { paths.add(it.resolve(bundledName)) }
+        paths.add(home.resolve(".local/bin").resolve(installedName))
+        paths.add(home.resolve(".local/bin").resolve(aliasName))
+        paths.add(home.resolve(".snova/bin").resolve(installedName))
         System.getenv("LOCALAPPDATA")?.takeIf { it.isNotEmpty() }?.let {
-            paths += Path.of(it, "snova-lsp", "bin", installedName)
+            paths.add(Path.of(it, "snova-lsp", "bin", installedName))
         }
         return paths
     }

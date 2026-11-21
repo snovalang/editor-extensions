@@ -8,22 +8,17 @@ The VS Code extension ships Linux ELF `snova-lsp`, Windows `snova-lsp.exe`, and 
 
 ## Downloads
 
-Every release is listed here; the release workflow adds a row for each new version. Click an editor to download its package.
+[![Latest release](https://img.shields.io/github/v/release/snovalang/editor-extensions?label=latest&sort=semver)](https://github.com/snovalang/editor-extensions/releases/latest) [![Release date](https://img.shields.io/github/release-date/snovalang/editor-extensions?label=released)](https://github.com/snovalang/editor-extensions/releases/latest)
 
-<!-- downloads:start -->
-**Latest** — [**VS Code**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) · [**Zed**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) · [**JetBrains**](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip)
+The badge shows the newest version, and these links always download that version:
 
-| Version | Date | VS Code | Zed | JetBrains |
-| --- | --- | --- | --- | --- |
-| [v0.3.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.3.0) | 2026-10-05 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.3.0/snovalang-zed.tar.gz) | — |
-| [v0.2.1](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.1) | 2026-10-04 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.1/snovalang-zed.tar.gz) | — |
-| [v0.2.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.2.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.2.0/snovalang-zed.tar.gz) | — |
-| [v0.1.0](https://github.com/snovalang/editor-extensions/releases/tag/v0.1.0) | 2026-10-03 | [VS Code](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang.vsix) | [Zed](https://github.com/snovalang/editor-extensions/releases/download/v0.1.0/snovalang-zed.tar.gz) | — |
+| Editor | Download |
+| --- | --- |
+| VS Code | [snovalang.vsix](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang.vsix) |
+| JetBrains IDEs | [snovalang-jetbrains.zip](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-jetbrains.zip) |
+| Zed | [snovalang-zed.tar.gz](https://github.com/snovalang/editor-extensions/releases/latest/download/snovalang-zed.tar.gz) |
 
-Older versions: [all releases](https://github.com/snovalang/editor-extensions/releases).
-<!-- downloads:end -->
-
-The JetBrains plugin ships from the first release after v0.3.0.
+Earlier versions and release notes: [all releases](https://github.com/snovalang/editor-extensions/releases). The JetBrains plugin is attached to releases after v0.3.0.
 
 ## VS Code
 
@@ -131,7 +126,7 @@ Clone this repository to change the extensions.
 ./scripts/package-jetbrains.sh # writes dist/snovalang-jetbrains.zip (needs JDK 21)
 ```
 
-Every push to `master` creates a GitHub release with `snovalang.vsix`, `snovalang-zed.tar.gz` and `snovalang-jetbrains.zip`, and adds the version to the [Downloads](#downloads) table. Release versions follow Conventional Commits: `feat:` bumps minor, a breaking change (`!` or `BREAKING CHANGE:`) bumps major, and other commits bump patch. GitHub Copilot is instructed to use these commit prefixes in [.github/copilot-instructions.md](.github/copilot-instructions.md). The release workflow updates the VS Code, Zed and JetBrains package manifests to the selected version before building.
+Every push to `master` creates a GitHub release with `snovalang.vsix`, `snovalang-zed.tar.gz` and `snovalang-jetbrains.zip`. The [Downloads](#downloads) badge and links follow the newest release. Release versions follow Conventional Commits: `feat:` bumps minor, a breaking change (`!` or `BREAKING CHANGE:`) bumps major, and other commits bump patch. GitHub Copilot is instructed to use these commit prefixes in [.github/copilot-instructions.md](.github/copilot-instructions.md). The release workflow takes the version from the newest `v*` tag, sets it in the VS Code, Zed and JetBrains manifests inside the CI workspace before building, and tags the merged commit. It does not push to `master`.
 
 VS Code development: `cd vscode && npm ci && npm run compile`.
 
