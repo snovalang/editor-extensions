@@ -34,6 +34,8 @@ jobs:
       - name: Select the next semantic version
         id: version
         run: echo "version=$(node scripts/next-release-version.mjs)" >> "$GITHUB_OUTPUT"
+      # The version lives in the tag. Manifests are bumped only in this
+      # workspace, so the release never pushes to the protected master branch.
       - name: Set release versions in extension manifests
         run: node scripts/set-release-version.mjs "${{ steps.version.outputs.version }}"
       - name: Package VS Code extension
@@ -59,7 +61,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
-          TARGET: ${{ steps.release_commit.outputs.target }}
+          TARGET: ${{ github.sha }}
         run: |
           gh release create "v${VERSION}" \
             dist/snovalang.vsix \
